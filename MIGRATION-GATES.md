@@ -129,3 +129,31 @@ Written to prove mechanisms, not to be published:
   `static/PDF/2019/` — demonstrate a post carrying several downloadable files.
 - `content/banner/alert.md` currently holds a real message about the September
   meeting, which is genuine but should be reviewed before go-live.
+
+## 9. An About page, carrying the Association's own words
+
+**The paragraph presently on the home page beginning "The Association brings
+together the trustees and fiscal officers" was written during the build. It is
+placeholder text and must not ship as though it were the Association's own.**
+
+Two things to do:
+
+- **Move it off the home page and into an About page of its own**, so the home
+  page opens on what is current rather than on a standing description.
+- **Replace it with the Association's actual wording**, which exists. The
+  present home page carries a purpose statement of 335 characters beginning
+  *"The purpose of the Clermont County Township Association is to protect
+  townships against any attempt to abolish it as a governmental unit…"*
+
+**One finding to weigh before copying that across.** The present statement is a
+condensation of **Article IV of the constitution**, and it keeps only two of the
+five purposes: protecting the township as a governmental unit, and securing an
+equitable share of gasoline tax revenue. It drops three — securing a better
+acquaintance among township officials, promoting knowledge of their rights and
+duties, and securing legislation enabling township government to function more
+effectively.
+
+Whether the About page carries Article IV in full, the existing condensation, or
+a fuller summary is an editorial choice for the officers rather than one to make
+while migrating. **What should not happen is reproducing the partial version
+without anybody noticing that three purposes went missing.**

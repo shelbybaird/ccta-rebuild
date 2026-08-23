@@ -40,7 +40,9 @@
     {{ range .Pages.ByWeight }}
     <li class="card">
       <div class="card__media"><img src="{{ partial "asset.html" .Params.image }}" alt="" loading="lazy"></div>
-      <div class="card__body"><h3><a href="{{ .Params.url_ }}" rel="noopener">{{ .Title }}</a></h3></div>
+      <div class="card__body">{{/* Abbreviated for this compact row only. The member townships page
+                 carries every name in full. */}}
+              <h3><a href="{{ .Params.url_ }}" target="_blank" rel="noopener">{{ replace .Title "Township" "Twp" }}{{ partial "newtab-note.html" . }}</a></h3></div>
     </li>
     {{ end }}
   </ul>

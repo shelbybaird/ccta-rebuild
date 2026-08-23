@@ -160,9 +160,31 @@ main { padding: var(--s7) 0 var(--s8); }
   scrollbar-width: thin;
   scrollbar-color: var(--rule) var(--surface-sunk);
 }
-.rail > li { flex: 0 0 200px; scroll-snap-align: start; }
+.rail > li { flex: 0 0 230px; scroll-snap-align: start; }
+/* Deliberately plain block layout inside the tile. An earlier attempt made the
+   card a flex column, which let the image box — sized by aspect-ratio — be
+   squeezed to half the tile width. Nothing here needs flex.
+   The heading keeps its full size; the row abbreviates "Township" to "Twp"
+   in the template instead, and the townships page shows names in full. */
+.rail .card__body { min-height: 3.5rem; }
+.rail .card__body h3 { margin: 0; }
 .rail::-webkit-scrollbar { height: 10px; }
 .rail::-webkit-scrollbar-track { background: var(--surface-sunk); border-radius: 999px; }
 .rail::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 999px; }
 .rail::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 .rail__hint { font-size: .85rem; color: var(--muted); margin: 0 0 var(--s2); }
+
+/* --- Links that leave this page ----------------------------------------- */
+/* Available to a screen reader, invisible on screen — a sighted reader gets
+   the same information from the marker below. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+a[target="_blank"]::after {
+  content: "\00A0\2197";       /* non-breaking space + north-east arrow, so the
+                                   marker can never be left alone on a line */
+  font-size: .8em;
+  color: var(--muted);
+  text-decoration: none;
+}

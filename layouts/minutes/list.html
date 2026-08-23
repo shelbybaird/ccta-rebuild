@@ -8,7 +8,7 @@
     {{ range .Pages.ByDate.Reverse }}
     <li>
       <span class="rows__date">{{ .Date.Format "2 January" }}</span>
-      <a href="{{ partial "asset.html" .Params.document }}">Minutes of {{ .Date.Format "2 January 2006" }} (PDF)</a>
+      <a href="{{ partial "asset.html" .Params.document }}" target="_blank" rel="noopener">Minutes of {{ .Date.Format "2 January 2006" }} (PDF){{ partial "newtab-note.html" . }}</a>
       {{ with .Params.note }}<span class="tag">{{ . }}</span>{{ end }}
     </li>
     {{ end }}

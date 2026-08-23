@@ -4,12 +4,12 @@
   {{ $desc := .Reverse }}
   {{ $current := index $desc 0 }}
 <p class="lede">The constitution as adopted {{ $current.Params.adopted }}.</p>
-<p><a href="{{ partial "asset.html" $current.Params.document }}">{{ $current.Title }} (PDF)</a></p>
+<p><a href="{{ partial "asset.html" $current.Params.document }}" target="_blank" rel="noopener">{{ $current.Title }} (PDF){{ partial "newtab-note.html" . }}</a></p>
   {{ with after 1 $desc }}
 <section class="section"><h2>Amendment record</h2>
   <ul class="rows">
     {{ range . }}<li><span class="rows__date">{{ .Params.adopted }}</span>
-      <a href="{{ partial "asset.html" .Params.document }}">{{ .Title }}</a>{{ with .Params.note }}<span>{{ . }}</span>{{ end }}</li>{{ end }}
+      <a href="{{ partial "asset.html" .Params.document }}" target="_blank" rel="noopener">{{ .Title }}{{ partial "newtab-note.html" . }}</a>{{ with .Params.note }}<span>{{ . }}</span>{{ end }}</li>{{ end }}
   </ul></section>
   {{ end }}
 {{ else }}

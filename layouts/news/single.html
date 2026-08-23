@@ -12,7 +12,7 @@
     <ul class="rows">
       {{ range . }}
       <li>
-        <a href="{{ partial "asset.html" .file }}">{{ .title }}</a>
+        <a href="{{ partial "asset.html" .file }}" target="_blank" rel="noopener">{{ .title }}{{ partial "newtab-note.html" . }}</a>
         <span class="tag">{{ path.Ext .file | strings.TrimPrefix "." | upper }}</span>
       </li>
       {{ end }}

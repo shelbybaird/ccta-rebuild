@@ -94,6 +94,14 @@ Recorded so that they are fixed deliberately rather than reproduced:
 - Three township tiles exist only at 160x105 (Goshen, Miami, Wayne), because
   their logos were refreshed in 2023 and only the small version was replaced.
   Asking those three for a current logo is a cheap fix.
+- Three of the fifteen township links carry a malformed target: two say `blank`
+  and one says `html` where `_blank` was meant. A named target does not open a
+  fresh tab; it opens one window with that name and every later link replaces
+  what is in it. The Secretary reports having twice closed the Association's own
+  site while trying to close a document. Not reproduced here, and not carried
+  forward: every link that leaves a page in the rebuild opens a new tab, with
+  `rel="noopener"` and a note for a screen reader, while links within the site
+  stay in place.
 
 ## 7. The content model document is now behind the build
 

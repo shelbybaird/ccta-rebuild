@@ -94,3 +94,30 @@ Recorded so that they are fixed deliberately rather than reproduced:
 - Three township tiles exist only at 160x105 (Goshen, Miami, Wayne), because
   their logos were refreshed in 2023 and only the small version was replaced.
   Asking those three for a current logo is a cheap fix.
+
+## 7. The content model document is now behind the build
+
+Two changes were made during the build that `content-model-2026-08-22.md` in the
+private `ccta-website` repository does not yet reflect. The committed document
+is the durable record, so it should be amended rather than left to drift.
+
+- **Announcements carry `attachments`, a list, not a single `attachment`.**
+  Decided 2026-08-23. The section exists to answer *"can you get this posted"*,
+  and that routinely means more than one file. Each entry carries a title and a
+  file, so the link text reads as a document name rather than an address.
+  Outbound links belong in the post body, which already handles them.
+- **Officers are the five offices of Article V, not four**, and the roster
+  carries no telephone number or street address. Both are recorded under gates
+  1 and 3 above.
+
+## 8. Sample content to delete before the site goes live
+
+Written to prove mechanisms, not to be published:
+
+- `content/news/expired-notice.md`, `future-notice.md`, `taken-down.md` — the
+  three that must never appear, used to prove the display window works and that
+  the check for it can fail.
+- `content/news/sponsorship-sample.md` and the two files under
+  `static/PDF/2019/` — demonstrate a post carrying several downloadable files.
+- `content/banner/alert.md` currently holds a real message about the September
+  meeting, which is genuine but should be reviewed before go-live.

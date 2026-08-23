@@ -35,8 +35,9 @@
 {{ with site.GetPage "/townships" }}
 <section class="section">
   <div class="section__head"><h2>{{ .Title }}</h2><a href="{{ .RelPermalink }}">All fourteen</a></div>
-  <ul class="grid grid--twp">
-    {{ range first 8 .Pages.ByWeight }}
+  <p class="rail__hint">All fourteen members, listed alphabetically. Scroll to see them all.</p>
+  <ul class="rail">
+    {{ range .Pages.ByWeight }}
     <li class="card">
       <div class="card__media"><img src="{{ partial "asset.html" .Params.image }}" alt="" loading="lazy"></div>
       <div class="card__body"><h3><a href="{{ .Params.url_ }}" rel="noopener">{{ .Title }}</a></h3></div>

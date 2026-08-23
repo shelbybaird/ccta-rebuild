@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} — {{ site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Title }}{{ end }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{ with resources.Get "css/main.css" | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
+  {{ end }}
+  <link rel="icon" href="{{ "images/favicon.png" | relURL }}">
+  {{ with .OutputFormats.Get "rss" }}<link rel="alternate" type="application/rss+xml" href="{{ .RelPermalink }}" title="{{ site.Title }}">{{ end }}
+  <meta property="og:title" content="{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }}{{ end }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ .Permalink }}">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  {{ partial "banner.html" . }}
+  {{ partial "masthead.html" . }}
+  <main id="main"><div class="wrap">{{ block "main" . }}{{ end }}</div></main>
+  {{ partial "footer.html" . }}
+</body>
+</html>

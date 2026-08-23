@@ -1,0 +1,21 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ with .Pages.ByParam "adopted" }}
+  {{ $desc := .Reverse }}
+  {{ $current := index $desc 0 }}
+<p class="lede">The constitution as adopted {{ $current.Params.adopted }}.</p>
+<p><a href="{{ partial "asset.html" $current.Params.document }}">{{ $current.Title }} (PDF)</a></p>
+  {{ with after 1 $desc }}
+<section class="section"><h2>Amendment record</h2>
+  <ul class="rows">
+    {{ range . }}<li><span class="rows__date">{{ .Params.adopted }}</span>
+      <a href="{{ partial "asset.html" .Params.document }}">{{ .Title }}</a>{{ with .Params.note }}<span>{{ . }}</span>{{ end }}</li>{{ end }}
+  </ul></section>
+  {{ end }}
+{{ else }}
+<div class="note">
+  <p>No adopted constitution has been posted yet.</p>
+  <p>The constitution is published here as the document the membership adopted, not as text that can be edited between votes. Article XI permits amendment only at a regular meeting by majority vote, with the proposal filed with the Secretary thirty days beforehand and circulated to every active member two weeks before.</p>
+</div>
+{{ end }}
+{{ end }}

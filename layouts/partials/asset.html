@@ -1,0 +1,6 @@
+{{- /* Turns a stored path into a correct URL for whichever base path this build
+       is using. The editor writes paths beginning with a slash, and relURL
+       leaves those untouched, so the slash is trimmed first. Every reference to
+       an uploaded file goes through here — that is what keeps the same source
+       correct at a root domain and under a subdirectory preview. */ -}}
+{{- . | strings.TrimPrefix "/" | relURL -}}

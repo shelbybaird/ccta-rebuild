@@ -1,0 +1,149 @@
+/* ---------------------------------------------------------------------------
+   Design tokens. Every colour, size and spacing value in this stylesheet is
+   defined here and referenced everywhere else, so that changing the site's
+   appearance is an edit to this block rather than a search through the file.
+   The palette is carried over from the present site: amber accent, navy ink.
+   --------------------------------------------------------------------------- */
+:root {
+  --accent:          #ffb200;   /* the present site's amber */
+  --accent-dark:     #8a5f00;   /* amber dark enough for text on white (AA) */
+  --ink:             #293d68;   /* the present site's navy */
+  --ink-strong:      #16233d;
+  --body:            #2c3038;
+  --muted:           #5b6472;
+  --rule:            #dfe3ea;
+  --surface:         #ffffff;
+  --surface-sunk:    #f5f7fa;
+  --link:            #1b4b8f;
+  --link-visited:    #5c3d8f;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --measure: 68ch;
+  --page: 68rem;
+
+  --s1: .25rem; --s2: .5rem; --s3: .75rem; --s4: 1rem;
+  --s5: 1.5rem; --s6: 2rem;  --s7: 3rem;   --s8: 4rem;
+
+  --radius: 6px;
+  --shadow: 0 1px 2px rgba(20,30,50,.06), 0 4px 14px rgba(20,30,50,.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--body);
+  background: var(--surface);
+}
+h1, h2, h3 { color: var(--ink-strong); line-height: 1.2; margin: 0 0 var(--s3); font-weight: 700; }
+h1 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(1.3rem, 1.05rem + 1vw, 1.6rem); }
+h3 { font-size: 1.125rem; }
+p  { margin: 0 0 var(--s4); max-width: var(--measure); }
+a  { color: var(--link); text-underline-offset: .15em; }
+a:visited { color: var(--link-visited); }
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 2px;
+}
+img { max-width: 100%; height: auto; }
+
+.wrap { width: min(var(--page), 100% - 2.5rem); margin-inline: auto; }
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--ink-strong); color: #fff; padding: var(--s3) var(--s4); z-index: 100;
+}
+.skip:focus { left: var(--s4); top: var(--s4); }
+
+/* --- Alert banner ------------------------------------------------------- */
+.banner {
+  background: var(--accent); color: var(--ink-strong);
+  border-bottom: 1px solid rgba(0,0,0,.12);
+}
+.banner__inner { display: flex; gap: var(--s3); align-items: baseline; padding: var(--s3) 0; }
+.banner__label { font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .06em; }
+.banner p { margin: 0; max-width: none; }
+.banner a { color: var(--ink-strong); }
+
+/* --- Header ------------------------------------------------------------- */
+.masthead { border-bottom: 1px solid var(--rule); background: var(--surface); }
+.masthead__inner { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; padding: var(--s4) 0; }
+.masthead__logo img { display: block; max-height: 62px; width: auto; }
+.masthead__title { font-weight: 700; color: var(--ink-strong); text-decoration: none; font-size: 1.15rem; line-height: 1.25; }
+.masthead__title span { display: block; font-weight: 400; color: var(--muted); font-size: .9rem; }
+
+.nav { border-bottom: 3px solid var(--accent); background: var(--surface); }
+.nav ul { display: flex; flex-wrap: wrap; gap: var(--s1); list-style: none; margin: 0; padding: 0; }
+.nav a {
+  display: block; padding: var(--s3) var(--s4);
+  color: var(--ink); text-decoration: none; font-weight: 600; border-radius: var(--radius) var(--radius) 0 0;
+}
+.nav a:hover { background: var(--surface-sunk); text-decoration: underline; }
+.nav a[aria-current="page"] { background: var(--ink); color: #fff; }
+
+/* --- Layout ------------------------------------------------------------- */
+main { padding: var(--s7) 0 var(--s8); }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: var(--measure); }
+.section + .section { margin-top: var(--s7); }
+.section__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); margin-bottom: var(--s4); }
+.section__head h2 { margin: 0; }
+
+/* --- Cards / grids ------------------------------------------------------ */
+.grid { display: grid; gap: var(--s5); list-style: none; margin: 0; padding: 0; }
+.grid--twp   { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.grid--offc  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.card__media { aspect-ratio: 37 / 24; background: var(--surface-sunk); display: grid; place-items: center; }
+.card__media img { width: 100%; height: 100%; object-fit: contain; padding: var(--s3); }
+.card__body { padding: var(--s4); }
+.card__body h3 { margin: 0 0 var(--s1); }
+.card__body p { margin: 0; font-size: .95rem; color: var(--muted); }
+
+/* --- Announcements ------------------------------------------------------ */
+.posts { list-style: none; margin: 0; padding: 0; }
+.posts li { padding: var(--s5) 0; border-bottom: 1px solid var(--rule); }
+.posts li:first-child { padding-top: 0; }
+.post__date { display: block; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--s1); }
+.post__title { font-size: 1.25rem; margin: 0 0 var(--s2); }
+.post__title a { text-decoration: none; color: var(--ink-strong); }
+.post__title a:hover { text-decoration: underline; }
+
+/* --- Meetings + minutes ------------------------------------------------- */
+.rows { list-style: none; margin: 0 0 var(--s5); padding: 0; }
+.rows li { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); align-items: baseline;
+           padding: var(--s3) 0; border-bottom: 1px solid var(--rule); }
+.rows time, .rows .rows__date { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-strong); min-width: 11rem; }
+.tag { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+       padding: .15rem .5rem; border-radius: 999px; background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--rule); }
+.tag--cancelled { background: #fdecec; color: #8c1d1d; border-color: #f3c9c9; }
+.tag--moved     { background: #fff5e0; color: var(--accent-dark); border-color: #f0dcaa; }
+.year { margin-top: var(--s6); }
+.year h3 { border-bottom: 3px solid var(--accent); display: inline-block; padding-bottom: var(--s1); }
+
+/* --- Officers ----------------------------------------------------------- */
+.officer { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s4); background: var(--surface); }
+.officer__office { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent-dark); }
+.officer__name { font-size: 1.15rem; margin: var(--s1) 0 var(--s2); }
+.officer dl { margin: 0; font-size: .95rem; }
+.officer dt { font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-top: var(--s2); }
+.officer dd { margin: 0; }
+
+/* --- Notices ------------------------------------------------------------ */
+.note { background: var(--surface-sunk); border-left: 4px solid var(--accent); padding: var(--s4); border-radius: 0 var(--radius) var(--radius) 0; }
+.note p:last-child { margin-bottom: 0; }
+.empty { color: var(--muted); font-style: italic; }
+
+/* --- Footer ------------------------------------------------------------- */
+.foot { border-top: 1px solid var(--rule); background: var(--surface-sunk); padding: var(--s6) 0; margin-top: var(--s8); font-size: .95rem; color: var(--muted); }
+.foot p { max-width: none; }
+.foot__built { font-size: .85rem; }
+
+@media (max-width: 640px) {
+  .masthead__inner { padding: var(--s3) 0; }
+  .nav a { padding: var(--s2) var(--s3); }
+  .rows time, .rows .rows__date { min-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

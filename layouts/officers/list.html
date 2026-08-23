@@ -1,0 +1,19 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+<p class="lede">The offices are those established by Article V of the constitution. One entry is kept per term of office, so the roster is a record rather than a page that overwrites itself.</p>
+<ul class="grid grid--offc">
+  {{ range where .Pages.ByWeight "Params.termEnd" nil }}
+  <li class="officer">
+    <p class="officer__office">{{ .Params.office }}</p>
+    <h2 class="officer__name">{{ .Params.name }}</h2>
+    <dl>
+      {{ with .Params.township }}<dt>Township</dt><dd>{{ . }}</dd>{{ end }}
+      {{ with .Params.email }}<dt>Email</dt><dd><a href="mailto:{{ . }}">{{ . }}</a></dd>{{ end }}
+      {{ with .Params.phone }}<dt>Telephone</dt><dd>{{ . }}</dd>{{ end }}
+      {{ with .Params.address }}<dt>Address</dt><dd>{{ . }}</dd>{{ end }}
+    </dl>
+    {{ with .Params.note }}<p>{{ . }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}

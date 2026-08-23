@@ -1,0 +1,10 @@
+# Build output. The published site is produced by the build, never committed.
+/public/
+/pub-root/
+/pub-sub/
+/verify-out/
+/resources/_gen/
+.hugo_build.lock
+
+# macOS
+.DS_Store

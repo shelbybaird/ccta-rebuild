@@ -1,0 +1,10 @@
+{{ define "main" }}
+<article>
+  <span class="post__date">{{ .Date.Format "2 January 2006" }}</span>
+  <h1>{{ .Title }}</h1>
+  {{ with .Params.image }}<img src="{{ partial "asset.html" . }}" alt="">{{ end }}
+  {{ .Content }}
+  {{ with .Params.attachment }}<p><a href="{{ partial "asset.html" . }}">Attachment (PDF)</a></p>{{ end }}
+  <p><a href="{{ (site.GetPage "/news").RelPermalink }}">All announcements</a></p>
+</article>
+{{ end }}

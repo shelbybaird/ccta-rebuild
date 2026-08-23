@@ -1,0 +1,19 @@
+{{/* One headless file. Hugo withholds it entirely once it expires or is taken
+     down, so there is no date comparison here — only "does the page exist".
+     The banner page is bound to $banner rather than reached through the dot,
+     because inside `with` the dot rebinds and `$` refers to the page being
+     rendered, not to the banner. */}}
+{{ $banner := site.GetPage "/banner/alert" }}
+{{ with $banner }}
+  {{ $message := .Title }}
+  {{ $target := "" }}
+  {{ with .Params.announcement }}
+    {{ with site.GetPage . }}{{ $target = .RelPermalink }}{{ end }}
+  {{ end }}
+<div class="banner">
+  <div class="wrap banner__inner">
+    <span class="banner__label">Notice</span>
+    <p>{{ if $target }}<a href="{{ $target }}">{{ $message }}</a>{{ else }}{{ $message }}{{ end }}</p>
+  </div>
+</div>
+{{ end }}

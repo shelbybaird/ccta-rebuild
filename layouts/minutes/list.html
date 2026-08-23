@@ -1,0 +1,20 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+<p class="lede">Minutes of Association meetings. Each entry links directly to the document.</p>
+{{ range .Pages.GroupByDate "2006" }}
+<section class="year">
+  <h3>{{ .Key }}</h3>
+  <ul class="rows">
+    {{ range .Pages.ByDate.Reverse }}
+    <li>
+      <span class="rows__date">{{ .Date.Format "2 January" }}</span>
+      <a href="{{ partial "asset.html" .Params.document }}">Minutes of {{ .Date.Format "2 January 2006" }} (PDF)</a>
+      {{ with .Params.note }}<span class="tag">{{ . }}</span>{{ end }}
+    </li>
+    {{ end }}
+  </ul>
+</section>
+{{ else }}
+<p class="empty">No minutes have been posted.</p>
+{{ end }}
+{{ end }}

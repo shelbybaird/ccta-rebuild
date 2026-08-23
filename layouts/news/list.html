@@ -1,0 +1,14 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ with .Pages }}
+<ul class="posts">
+  {{ range . }}
+  <li>
+    <span class="post__date">{{ .Date.Format "2 January 2006" }}</span>
+    <h2 class="post__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    {{ with .Params.summary }}<p>{{ . }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ else }}<p class="empty">No announcements at present.</p>{{ end }}
+{{ end }}

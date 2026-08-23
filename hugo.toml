@@ -1,0 +1,36 @@
+# Base address is supplied by the environment (HUGO_BASEURL) so that the same
+# source builds for a subdirectory preview and for a root domain. Nothing in
+# this repository hand-writes an internal path.
+baseURL = "https://cctownship.org/"
+
+title            = "Clermont County Township Association"
+languageCode     = "en-us"
+defaultContentLanguage = "en"
+
+# LOAD-BEARING. Without this, dates typed by an officer are read as UTC, which
+# runs four hours ahead of Ohio in summer and five in winter — so a notice set
+# to stop showing at the end of a day disappears during the afternoon before.
+timeZone = "America/New_York"
+
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 500          # The archive is ~87 entries fully backfilled. No pagination, ever.
+
+[taxonomies]               # None. Nothing in the content model is tagged.
+
+[markup.goldmark.renderer]
+  unsafe = false           # Presentation must not leak into content. No raw HTML in a post body.
+
+[params]
+  meetingDay      = "third Thursday"
+  meetingTime     = "6:30 pm"
+  contactEmail    = "info@cctownship.org"   # role address; the free mail account is retired
+
+# Hugo's default is to fall back to `date` when no publishDate is given, which
+# would make a meeting scheduled for next month invisible until it happened, and
+# would conflate "Posted" with "Show from" on an announcement. The content model
+# treats those as independent fields, so only an explicit publishDate counts.
+[frontmatter]
+  publishDate = ["publishDate"]
+  expiryDate  = ["expiryDate"]

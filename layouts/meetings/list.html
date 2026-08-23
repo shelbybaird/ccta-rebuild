@@ -1,0 +1,14 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+<p class="lede">The Association meets the {{ site.Params.meetingDay }} of the month at {{ site.Params.meetingTime }}. A cancelled meeting stays listed and marked.</p>
+<ul class="rows">
+  {{ range .Pages.ByDate }}
+  <li>
+    <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Mon 2 Jan 2006" }}</time>
+    <span>{{ .Params.location }}</span>
+    {{ if ne .Params.status "scheduled" }}<span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}
+    {{ with .Params.note }}<span>{{ . }}</span>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}

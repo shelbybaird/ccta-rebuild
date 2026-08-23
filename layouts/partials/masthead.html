@@ -1,0 +1,19 @@
+<header class="masthead">
+  <div class="wrap masthead__inner">
+    <a class="masthead__logo" href="{{ site.Home.RelPermalink }}"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
+    <a class="masthead__title" href="{{ site.Home.RelPermalink }}">Clermont County Township Association
+      <span>Meets the {{ site.Params.meetingDay }} of the month, {{ site.Params.meetingTime }}</span></a>
+  </div>
+</header>
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <ul>
+      <li><a href="{{ site.Home.RelPermalink }}"{{ if .IsHome }} aria-current="page"{{ end }}>Home</a></li>
+      {{/* Labels come from each section's own title field — change it there and
+           the heading and this menu move together. */}}
+      {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
+        <li><a href="{{ .RelPermalink }}"{{ if $.IsDescendant . }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+      {{ end }}{{ end }}
+    </ul>
+  </div>
+</nav>

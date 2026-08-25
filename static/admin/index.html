@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The editor is not a page of the website and must never be indexed. -->
+    <meta name="robots" content="noindex" />
+    <title>Clermont County Township Association — editing</title>
+  </head>
+  <body>
+    <!--
+      Pinned to an exact release rather than a floating tag, so that an upstream
+      publication can never change this page on its own. Raising the version is
+      a deliberate edit, made and tested here first.
+
+      Revisit at hardening (execution plan 6.3): whether to hold a copy of this
+      file in the repository instead of fetching it. Doing so removes this one
+      request, but not the others the editor makes at run time, and it adds an
+      update by hand that only a maintainer can perform. That trade is worth
+      re-reading once response headers exist to be written.
+
+      Nothing here is loaded by the website itself. Every page a visitor sees
+      still loads no third-party resource at all.
+    -->
+    <script src="https://unpkg.com/@sveltia/cms@0.196.0/dist/sveltia-cms.js"></script>
+  </body>
+</html>

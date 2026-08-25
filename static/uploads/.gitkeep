@@ -1,0 +1,3 @@
+This folder is where the editor puts anything uploaded through it. It is kept in
+the repository so that the folder exists before the first upload: the editor
+offers a destination it can see, and an absent folder is not one.

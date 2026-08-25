@@ -1,0 +1,573 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.196.0/schema/sveltia-cms.json
+
+# Editing configuration for the Clermont County Township Association website.
+#
+# Every field below corresponds to a field in the content model, and the labels
+# are what an officer reads. Where a label departs from the field name stored in
+# the file, the label is the plain-English question and the name is what Hugo
+# expects.
+#
+# Two things are deliberately absent and are recorded here so their absence is
+# not mistaken for an oversight:
+#   - No telephone number and no street address on the officer roster. A public
+#     repository publishes its history, so a detail entered once cannot later be
+#     withdrawn. Settled 23 August 2026.
+#   - No editing box for the constitution. It is a document that is posted, not
+#     a page that is edited: Article XI allows amendment only by a vote of the
+#     membership.
+
+backend:
+  name: github
+  repo: shelbybaird/ccta-rebuild
+  branch: main
+  # base_url is added at execution plan task 5.2, once the sign-in service
+  # exists. Until then the editor runs against the local repository, which
+  # performs no Git operation and needs no authentication.
+
+# Saving an entry opens a pull request rather than changing the published site.
+# A second officer publishes it by merging, and neither of them sees Git: the
+# editor presents this as a status to move a card between.
+# This is a remote workflow. It does nothing in the local repository workflow.
+publish_mode: editorial_workflow
+
+# Uploads land in one place. Documents already on the server keep their existing
+# paths so that links to them continue to resolve; only new uploads come here.
+media_folder: /static/uploads
+public_folder: /uploads
+
+# The repository keeps every version of every file permanently, and deleting a
+# photograph later does not reclaim its space. Uploads are therefore capped at
+# the point of upload rather than by asking anybody to remember.
+media_libraries:
+  all:
+    max_file_size: 1048576      # one megabyte
+    slugify_filename: true      # a filename with spaces makes a fragile address
+    transformations:
+      raster_image:
+        format: webp            # the only conversion target the editor supports
+        quality: 85
+        width: 1600             # a maximum, not a target: smaller is left alone
+        height: 1600
+      svg:
+        optimize: true
+
+# The cap above is applied AFTER the image conversion, proved on 23 August 2026:
+# a 4,252,401-byte photograph straight off a telephone was accepted and stored
+# as 339,568 bytes at 1600×1200. For a photograph the number is therefore a
+# backstop that never binds.
+#
+# A DOCUMENT IS NOT CONVERTED, so the same number would bind at full size. The
+# three scanned sets of minutes already on the server run to 473 KB where a
+# typed one averages 76 KB, and roughly fifty more meetings remain to be
+# scanned. The file fields below therefore carry their own limit: generous
+# enough that no scan of a set of minutes is ever refused, and still a backstop
+# against something uploaded by mistake.
+
+# The editor's preview pane would render these entries with its own generic
+# markup rather than the website's, which would show an officer something that
+# is not what the page looks like. The site itself is the preview.
+editor:
+  preview: false
+
+# Without this, an optional field left alone is written as an empty string
+# rather than left out, and Hugo reads an empty string as a value that is
+# present. That is what removed an officer from the roster on 23 August 2026:
+# `termEnd: ''` is not the same as no term end.
+output:
+  omit_empty_optional_fields: true
+
+collections:
+  # ─── Announcements ──────────────────────────────────────────────────────────
+  - name: news
+    label: Announcements
+    label_singular: Announcement
+    icon: campaign
+    folder: /content/news
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields: [date, title]
+    fields:
+      - label: Headline
+        name: title
+        widget: string
+        required: true
+
+      - label: Posted
+        name: date
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        default: '{{now}}'
+        required: true
+        hint: The date shown to a reader, and the order of the list.
+
+      - label: Show from
+        name: publishDate
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: false
+        hint: >-
+          Leave empty to publish straight away. Filled in, the announcement does
+          not exist on the site until that moment.
+
+      - label: Stop showing after
+        name: expiryDate
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD[T23:59:59]'
+        input_timezone: America/New_York
+        required: false
+        hint: >-
+          Leave empty for a notice that stays up until somebody removes it. The
+          announcement remains visible throughout the chosen day and is gone the
+          following morning.
+
+      - label: Take this down
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: >-
+          Removes the announcement from the site at the next build, whatever the
+          dates say. This is how a notice with no expiry date is withdrawn.
+
+      - label: Summary
+        name: summary
+        widget: text
+        required: false
+        hint: >-
+          One or two sentences. Shown on the announcements list and on the home
+          page, and used when the address is shared.
+
+      - label: Photograph
+        name: image
+        widget: image
+        required: false
+        media_folder: /static/uploads
+        public_folder: /uploads
+
+      - label: Files
+        name: attachments
+        label_singular: File
+        widget: list
+        required: false
+        summary: '{{fields.title}}'
+        hint: >-
+          Documents hosted on this site. A link to another organization's page
+          belongs in the announcement itself, below.
+        fields:
+          - { label: Title, name: title, widget: string, required: true }
+          - label: Document
+            name: file
+            widget: file
+            required: true
+            media_folder: /static/uploads
+            public_folder: /uploads
+            media_libraries:
+              all:
+                max_file_size: 10485760   # documents are not converted
+
+      - label: Announcement
+        name: body
+        widget: markdown
+        required: true
+
+  # ─── Meetings ───────────────────────────────────────────────────────────────
+  - name: meetings
+    label: Meetings
+    label_singular: Meeting
+    icon: event
+    folder: /content/meetings
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: location
+    slug: "{{fields.date | date('YYYY-MM-DD')}}"
+    summary: "{{fields.date | date('D MMMM YYYY')}} — {{fields.location}}"
+    sortable_fields: [date]
+    fields:
+      - label: Date and time
+        name: date
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: true
+
+      - label: Location
+        name: location
+        widget: string
+        required: true
+
+      - label: Address
+        name: address
+        widget: string
+        required: false
+        hint: >-
+          Not shown on the schedule page. It supplies the location to anyone who
+          subscribes to the meeting calendar.
+
+      - label: Status
+        name: status
+        widget: select
+        default: scheduled
+        required: true
+        options:
+          - { label: Scheduled, value: scheduled }
+          - { label: Cancelled, value: cancelled }
+          - { label: Moved, value: moved }
+        hint: >-
+          A cancelled meeting stays listed and is marked as cancelled. It is not
+          removed.
+
+      - label: Note
+        name: note
+        widget: string
+        required: false
+        hint: For example, joint meeting with the county, or moved from the 17th.
+
+  # ─── Minutes ────────────────────────────────────────────────────────────────
+  - name: minutes
+    label: Minutes
+    label_singular: Minutes entry
+    icon: history_edu
+    folder: /content/minutes
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: date
+    slug: "{{fields.date | date('YYYY-MM-DD')}}"
+    summary: "Minutes of {{fields.date | date('D MMMM YYYY')}}"
+    sortable_fields: [date]
+    # There is no title field. The archive labels each entry from its date, and
+    # a typed title would be a second statement of the same fact.
+    fields:
+      - label: Meeting date
+        name: date
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        required: true
+        hint: Places the entry under the right year and supplies its label.
+
+      - label: Document
+        name: document
+        widget: file
+        required: true
+        media_folder: /static/PDF/minutes
+        public_folder: /PDF/minutes
+        media_libraries:
+          all:
+            max_file_size: 10485760   # ten megabytes; documents are not converted
+
+      - label: Note
+        name: note
+        widget: string
+        required: false
+        hint: For example, special meeting, amended, or approved as corrected.
+
+  # ─── Officers ───────────────────────────────────────────────────────────────
+  - name: officers
+    label: Officers
+    label_singular: Officer
+    icon: badge
+    folder: /content/officers
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: name
+    slug: '{{fields.office}}-{{fields.name}}'
+    summary: '{{fields.office}} — {{fields.name}}'
+    # No ordering here, deliberately. The roster is shown in the order Article V
+    # names the offices, worked out from the office itself, so there is no
+    # position to set and none to get wrong.
+    # One entry per TERM OF OFFICE, not one per person. A roster that overwrites
+    # itself has no history in it, which is what issue #2 asked to retain.
+    fields:
+      - label: Office
+        name: office
+        widget: select
+        required: true
+        options:
+          - President
+          - Vice-President
+          - Secretary
+          - Treasurer
+          - Executive Committee-person
+        hint: >-
+          The five offices named in Article V. One person may hold two of them,
+          which is recorded as two entries.
+
+      - label: Name
+        name: name
+        widget: string
+        required: true
+
+      - label: Township
+        name: township
+        widget: select
+        required: false
+        options:
+          - Batavia Township
+          - Franklin Township
+          - Goshen Township
+          - Jackson Township
+          - Miami Township
+          - Monroe Township
+          - Ohio Township
+          - Pierce Township
+          - Stonelick Township
+          - Tate Township
+          - Union Township
+          - Washington Township
+          - Wayne Township
+          - Williamsburg Township
+        hint: >-
+          How a member reaches this officer. The roster publishes no personal
+          telephone number, so the township's own published number is the route.
+
+      - label: Term began
+        name: termStart
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        required: true
+        hint: >-
+          The date the officer took office. Article V sets elections on the
+          third Thursday in November, and the whole slate takes office together.
+          This is what makes the roster a dated record rather than a page that
+          overwrites itself.
+
+      - label: Term ended
+        name: termEnd
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        required: false
+        hint: Empty means the officer is currently serving.
+
+      - label: Email
+        name: email
+        widget: string
+        required: false
+        hint: >-
+          An address belonging to the office rather than the person, so that it
+          survives a change of officer.
+
+      - label: Note
+        name: note
+        widget: string
+        required: false
+
+  # ─── Member townships ───────────────────────────────────────────────────────
+  - name: townships
+    label: Member townships
+    label_singular: Township
+    icon: location_city
+    folder: /content/townships
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    # The county has fourteen townships and cannot gain a fifteenth, so the list
+    # is maintained rather than added to. A township leaving the Association is
+    # an event to handle deliberately, not a button to press by accident.
+    create: false
+    delete: false
+    identifier_field: title
+    summary: '{{title}}'
+    # Alphabetical unless deliberately changed. Use the Reorder button above
+    # the list; Hugo reads the resulting number from `weight`, which is why the
+    # key is named rather than left at its default.
+    reorder:
+      key: weight
+    fields:
+      - label: Township
+        name: title
+        widget: string
+        required: true
+
+      - label: Website
+        name: url_
+        widget: string
+        required: true
+        pattern: ['^https://', 'The address must begin with https://']
+        hint: >-
+          Checked when each entry was migrated. The field is named url_ because
+          Hugo reserves the plain name for a page's own address.
+
+      # What the Association asks a member for is written here rather than kept
+      # in somebody's head, because the person who replaces a tile years from
+      # now will read this field and nothing else. The standard is set by the
+      # page, not by taste: fourteen of these sit in a grid, and the grid only
+      # reads as a grid while they are all the same shape and all filled.
+      - label: Tile image
+        name: image
+        widget: image
+        required: true
+        media_folder: /static/images/townships
+        public_folder: /images/townships
+        hint: >-
+          This picture is the whole tile, so it has to carry the township's name
+          itself — nothing is printed underneath it. Supply it at 370 by 240
+          pixels, or anything larger in those same proportions, and let the
+          artwork fill the frame corner to corner. A logo on its own is usually
+          the wrong shape: it leaves wide margins, and one tile with margins
+          beside another without them is what stops a row of them looking like a
+          row. Set the name in large enough type to read at postcard size.
+
+      - label: Backing color behind the picture
+        name: tileBackground
+        widget: color
+        required: false
+        allowInput: true
+        hint: >-
+          Leave this empty almost always. It exists for a picture that does not
+          fill its frame, or one drawn in white for a dark background, so that
+          what sits behind it is chosen rather than left to chance. It changes
+          only this one township's tile.
+
+
+  # ─── The constitution ───────────────────────────────────────────────────────
+  - name: constitution
+    label: Constitution
+    label_singular: Adopted version
+    icon: gavel
+    folder: /content/constitution
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: title
+    slug: "{{fields.adopted | date('YYYY-MM-DD')}}"
+    summary: '{{title}}'
+    sortable_fields: [adopted]
+    # One entry per ADOPTED VERSION, which is what gives the page an amendment
+    # record rather than a file that silently overwrites itself. There is no
+    # body text field: anything typed into one would sit beside the adopted
+    # document looking equally official while carrying none of its authority.
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        required: true
+        hint: For example, Constitution and Bylaws, as amended 2021.
+
+      - label: Adopted
+        name: adopted
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        required: true
+        hint: >-
+          The date of the vote that made this version authoritative. The most
+          recent one is shown as the current constitution.
+
+      - label: Document
+        name: document
+        widget: file
+        required: true
+        media_folder: /static/PDF/constitution
+        public_folder: /PDF/constitution
+        media_libraries:
+          all:
+            max_file_size: 10485760   # ten megabytes; documents are not converted
+
+      - label: What changed
+        name: note
+        widget: string
+        required: false
+        hint: A line describing the amendment, so the history reads as a record.
+
+# The alert banner is one file, so there is exactly one banner. It appears in
+# the sidebar on its own and opens straight into its form.
+singletons:
+  - name: banner
+    label: Alert banner
+    icon: campaign
+    file: /content/banner/alert.md
+    format: yaml-frontmatter
+    fields:
+      - label: Message
+        name: title
+        widget: string
+        required: true
+        hint: One line. A banner that runs to a paragraph stops being read.
+
+      # The field stores a NAME, not a color. A color picker would let any
+      # value be chosen, including ones that are unreadable against the text,
+      # and it would put a presentation decision into the content where a later
+      # redesign cannot reach it. A fixed set of names does the opposite: the
+      # colors live in the stylesheet, so changing one changes every banner
+      # that has ever carried that name, and the name itself comes to mean
+      # something to a member who visits often.
+      - label: What kind of notice is this?
+        name: noticeKind
+        widget: select
+        default: notice
+        required: true
+        options:
+          - { label: Notice, value: notice }
+          - { label: Important, value: important }
+          - { label: Cancelled, value: cancelled }
+        hint: >-
+          Sets the color of the banner, and the word at the front of it unless
+          a different word is given below.
+
+      # The word is content, not presentation: no word can be illegible against
+      # its background, so nothing is gained by fixing it to the list above. The
+      # color stays constrained; the wording does not.
+      - label: A different word at the front
+        name: noticeLabel
+        widget: string
+        required: false
+        maxlength: 24
+        hint: >-
+          Leave this empty and the banner uses the usual word for the kind
+          chosen above. Fill it in when that word is not the right one — a
+          closure, a postponement, a change of place — and the color stays
+          exactly the same.
+
+      - label: Which announcement is this about?
+        name: announcement
+        widget: relation
+        required: false
+        collection: news
+        value_field: 'news/{{slug}}'
+        display_fields: [title]
+        search_fields: [title]
+        hint: >-
+          Turns the banner into a link to that announcement. Choosing from the
+          list means no address is typed, so none can later rot.
+
+      - label: Show from
+        name: publishDate
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: false
+
+      - label: Stop showing after
+        name: expiryDate
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD[T23:59:59]'
+        input_timezone: America/New_York
+        required: false
+        hint: >-
+          The banner has its own lifetime, separate from the announcement it
+          points at. A banner about a meeting comes down after the meeting; the
+          announcement of it stays as a record.
+
+      - label: Take this down
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: Removes the banner at the next build.

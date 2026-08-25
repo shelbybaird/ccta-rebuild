@@ -1,0 +1,28 @@
+{{/* One person on the roster, holding one office or several.
+
+     Takes a dict of `entries`: the officer's entries, already in the order the
+     offices should read. One entry is the ordinary case; more than one is the
+     same person holding more than one office, which the Association has done
+     for as long as the present roster goes back.
+
+     Held in a partial so the roster page renders the same card without the
+     markup being written twice. */}}
+{{ $entries := .entries }}
+{{ $first := index $entries 0 }}
+{{ $offices := slice }}
+{{ range $entries }}{{ $offices = $offices | append .Params.office }}{{ end }}
+<li class="officer">
+  <p class="officer__office">{{ delimit $offices ", " " and " }}</p>
+  <h2 class="officer__name">{{ $first.Params.name }}</h2>
+  <dl>
+    {{ with $first.Params.township }}<dt>Township</dt><dd>{{ . }}</dd>{{ end }}
+    {{/* An address belongs to the office, not the person, so somebody holding
+         two offices is reachable at both. */}}
+    {{ $emails := slice }}
+    {{ range $entries }}{{ with .Params.email }}{{ if not (in $emails .) }}{{ $emails = $emails | append . }}{{ end }}{{ end }}{{ end }}
+    {{ with $emails }}<dt>Email</dt>{{ range . }}<dd><a href="mailto:{{ . }}">{{ . }}</a></dd>{{ end }}{{ end }}
+    {{ with $first.Params.phone }}<dt>Telephone</dt><dd>{{ . }}</dd>{{ end }}
+    {{ with $first.Params.address }}<dt>Address</dt><dd>{{ . }}</dd>{{ end }}
+  </dl>
+  {{ range $entries }}{{ with .Params.note }}<p>{{ . }}</p>{{ end }}{{ end }}
+</li>

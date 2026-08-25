@@ -27,6 +27,14 @@ enableRobotsTXT = true
   meetingTime     = "6:30 pm"
   contactEmail    = "info@cctownship.org"   # role address; the free mail account is retired
 
+  # One person has held both the Secretary and Treasurer offices for as long as
+  # the present roster goes back, and the roster shows that as a single entry
+  # naming both offices. Nothing is combined in the content: each term of office
+  # is still its own entry, so the day the two offices go to two people the
+  # cards separate by themselves. Set this to false to show every office
+  # separately even when one person holds several.
+  combineSharedOffices = true
+
 # Hugo's default is to fall back to `date` when no publishDate is given, which
 # would make a meeting scheduled for next month invisible until it happened, and
 # would conflate "Posted" with "Show from" on an announcement. The content model

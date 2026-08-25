@@ -1,0 +1,23 @@
+{{/* An office is held by one person at a time. Nothing in the editing tool can
+     enforce that, because every check it offers looks at one entry on its own
+     and cannot see that another entry already claims the office. So the rule is
+     enforced here, where the whole roster is in view at once.
+
+     A duplicate stops the build rather than publishing. The reasoning is that a
+     roster naming two Presidents is read by trustees and fiscal officers who
+     will believe it, whereas a build that stops republishes nothing and leaves
+     yesterday's correct page in place — and the footer's build date makes a
+     site that has stopped updating visible to anyone who looks.
+
+     Takes a dict of `offices` and `serving`. */}}
+{{ $offices := .offices }}
+{{ $serving := .serving }}
+{{ range $offices }}
+  {{ $office := . }}
+  {{ $holders := where $serving "Params.office" $office }}
+  {{ if gt (len $holders) 1 }}
+    {{ $names := slice }}
+    {{ range $holders }}{{ $names = $names | append .Params.name }}{{ end }}
+    {{ errorf "The roster records %d people as currently serving as %s: %s. An office is held by one person at a time, so the term that has finished needs an end date. Officer entries are files in content/officers/, and the entry to change is the one whose term is over — giving it a Term ended date keeps it in the record instead of deleting it." (len $holders) $office (delimit $names ", " " and ") }}
+  {{ end }}
+{{ end }}

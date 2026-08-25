@@ -42,16 +42,16 @@ configured, which the execution plan places after approval. Until then the
 roster shows addresses that do not yet receive mail. **The exact strings are a
 routing setting, not a code change, so any of them can be renamed later.**
 
-## 2. `termStart` is required by the model and is not known for any officer
+## 2. `termStart` — CLOSED 2026-08-24
 
-The content model marks *Term began* as required, because that field is what
-makes the roster a dated record rather than a page that overwrites itself. **No
-term start date is known for any of the four current officers.** The entries
-have been written with the field absent rather than with an invented date, since
-a wrong date in a history is worse than a missing one.
+**Every serving officer's term began on 20 November 2025**, supplied by the
+Secretary. That date is the third Thursday of November 2025, which is the day
+Article V sets for elections, and the whole slate takes office together.
 
-The minutes are the likely source. Article V sets elections on the third
-Thursday in November.
+The entries had been written with the field absent rather than with an invented
+date, since a wrong date in a history is worse than a missing one. The real date
+was known to the Secretary rather than derivable from anything migrated, which
+is why it waited to be asked for.
 
 ## 3. The offices — CLOSED 2026-08-23
 
@@ -103,20 +103,18 @@ Recorded so that they are fixed deliberately rather than reproduced:
   `rel="noopener"` and a note for a screen reader, while links within the site
   stay in place.
 
-## 7. The content model document is now behind the build
+## 7. The content model document — CLOSED 2026-08-24
 
-Two changes were made during the build that `content-model-2026-08-22.md` in the
-private `ccta-website` repository does not yet reflect. The committed document
-is the durable record, so it should be amended rather than left to drift.
+`content-model-2026-08-22.md` in the private `ccta-website` repository is
+current. The two items this gate was opened for — announcements carrying a list
+of files rather than a single attachment, and the roster being built on Article
+V's five offices rather than the four the present site displays — are both
+recorded in it, along with everything the editing configuration established
+afterwards.
 
-- **Announcements carry `attachments`, a list, not a single `attachment`.**
-  Decided 2026-08-23. The section exists to answer *"can you get this posted"*,
-  and that routinely means more than one file. Each entry carries a title and a
-  file, so the link text reads as a document name rather than an address.
-  Outbound links belong in the post body, which already handles them.
-- **Officers are the five offices of Article V, not four**, and the roster
-  carries no telephone number or street address. Both are recorded under gates
-  1 and 3 above.
+**Keeping the document in step is now a practice rather than an outstanding
+item.** A finding from building amends the document in the same breath, because
+a prediction in a document does not outrank a fact from building it.
 
 ## 8. Sample content to delete before the site goes live
 

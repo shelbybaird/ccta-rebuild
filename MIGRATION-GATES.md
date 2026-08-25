@@ -155,3 +155,33 @@ Whether the About page carries Article IV in full, the existing condensation, or
 a fuller summary is an editorial choice for the officers rather than one to make
 while migrating. **What should not happen is reproducing the partial version
 without anybody noticing that three purposes went missing.**
+
+## 10. The Gmail account that receives the DMARC reports must stay open
+
+**The domain's email-authentication reporting is pinned to
+`clermontcountyta@gmail.com`.** Aggregate reports from every receiving mail
+server in the world are addressed to a token at Postmark's free monitoring
+service, and Postmark digests them into one message a week, delivered to that
+Gmail account every Monday morning. The arrangement was registered on 19 August
+2026 and verified the same night.
+
+**That is the same account this rebuild is retiring.** It is the address the
+withheld-value scan found in the site configuration and removed, and it is the
+account the present site's embedded calendar depends on.
+
+**⚠ If the account is closed, reporting stops silently.** There is no bounce, no
+error and nothing to notice. The domain would still publish a policy, receiving
+servers would still evaluate it, and nobody would ever again hear that the
+Association's domain was being spoofed. The failure is invisible by
+construction, which is what makes it worth writing down rather than remembering.
+
+**So the account stays open until the reporting address has been moved.** Moving
+it is two steps in order, not one: register the new destination with the
+monitoring service to obtain a fresh reporting address, and only then republish
+the DMARC record to point at it. Doing it in the other order loses every report
+in between.
+
+**When.** After name service moves and Email Routing exists, so that the reports
+can be directed at an address on the Association's own domain rather than at any
+individual's mailbox. That is the same dependency gate 1 records for the role
+addresses on the roster.

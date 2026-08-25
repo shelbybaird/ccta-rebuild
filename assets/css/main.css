@@ -1,21 +1,63 @@
 /* ---------------------------------------------------------------------------
-   Design tokens. Every colour, size and spacing value in this stylesheet is
+   Design tokens. Every color, size and spacing value in this stylesheet is
    defined here and referenced everywhere else, so that changing the site's
    appearance is an edit to this block rather than a search through the file.
-   The palette is carried over from the present site: amber accent, navy ink.
+   The palette comes from the Association's own logo, which is navy #293d68 and
+   a red-orange #ef4b37 and nothing else. The amber the present site carries is
+   not the Association's color: it is the stock accent of the bought template
+   that site is built on, still sitting in 119 places nobody ever changed.
+
+   Navy does the work: rules, underlines, headings and the focus ring are all
+   ink, so the warm end of the palette stays free to mean something, which is
+   what the alert banner spends it on.
+
+   The single deliberate exception is the rule under the navigation, which
+   carries the logo's red. The present site's one identity gesture is a bold red
+   band beneath its page headers, and this is that band brought across. It costs
+   something — every red on the page spends a little of red's signalling power —
+   and it is kept to one rule on purpose.
    --------------------------------------------------------------------------- */
 :root {
-  --accent:          #ffb200;   /* the present site's amber */
-  --accent-dark:     #8a5f00;   /* amber dark enough for text on white (AA) */
-  --ink:             #293d68;   /* the present site's navy */
+  --ink:             #293d68;   /* the logo's navy — 90% of the mark */
   --ink-strong:      #16233d;
+  /* The accent role is filled by the ink itself: rules, underlines and the
+     focus ring are navy, so that a warm color anywhere on the page is a
+     signal rather than an ornament. */
+  --accent:          var(--ink);
+  --accent-dark:     var(--ink);   /* 10.71:1 as text on white */
+  /* The logo's red, carried by ONE rule and nothing else. It manages 3.66:1
+     against white, so it can never sit behind text — but a rule is a graphical
+     element, which needs 3:1, and it clears that. */
+  --signature:       #ef4b37;
   --body:            #2c3038;
   --muted:           #5b6472;
   --rule:            #dfe3ea;
+  /* The ground and the raised surfaces are two different things. Pure white on
+     both meant nothing lifted off anything and the whole page glared at one
+     brightness. The ground is warmed and dimmed; cards, the masthead and the
+     navigation stay white and now sit ON it. */
+  --ground:          #faf7f2;   /* emits 93% of pure white's light */
   --surface:         #ffffff;
-  --surface-sunk:    #f5f7fa;
+  --surface-sunk:    #f2efe7;   /* 86% — a real step below the ground, and warm with it */
   --link:            #1b4b8f;
   --link-visited:    #5c3d8f;
+
+  /* Alert banner kinds. The banner stores a NAME, never a color, so this is
+     the only place the colors exist: changing one here changes every banner
+     that has ever carried that name. The comment on each pair is its contrast
+     ratio against the text color beside it. WCAG 2.1 AA asks for 4.5:1. */
+  --banner-notice-bg:     var(--ink);         /* 10.71:1  */
+  --banner-notice-fg:     #ffffff;
+  /* The one light band, so it alone carries dark text. It is the only place on
+     the site that is brighter than the text around it, which is what makes it
+     read as an interruption. */
+  --banner-important-bg:  #d9af39;            /*  7.56:1  */
+  --banner-important-fg:  var(--ink-strong);
+  /* The logo's own red at its own hue (6.7° against the mark's 6.5°), with the
+     saturation pulled from 85% down to 71% and darkened until it can carry
+     text. The raw logo red manages only 3.66:1 and cannot. */
+  --banner-cancel-bg:     #a32b1c;            /*  7.19:1  */
+  --banner-cancel-fg:     #ffffff;
 
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --measure: 68ch;
@@ -36,7 +78,7 @@ body {
   font-size: 1.0625rem;
   line-height: 1.65;
   color: var(--body);
-  background: var(--surface);
+  background: var(--ground);
 }
 h1, h2, h3 { color: var(--ink-strong); line-height: 1.2; margin: 0 0 var(--s3); font-weight: 700; }
 h1 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem); letter-spacing: -.02em; }
@@ -58,14 +100,29 @@ img { max-width: 100%; height: auto; }
 .skip:focus { left: var(--s4); top: var(--s4); }
 
 /* --- Alert banner ------------------------------------------------------- */
+/* One class chooses the pair of colors and every rule below reads that pair,
+   so a banner in a new color costs two tokens above and one line here. The
+   .banner rule carries the notice colors as its own defaults, which is what a
+   banner falls back to if its kind is missing or unrecognized: an unexpected
+   color is a far smaller failure than a message rendered on no background. */
 .banner {
-  background: var(--accent); color: var(--ink-strong);
+  --banner-bg: var(--banner-notice-bg);
+  --banner-fg: var(--banner-notice-fg);
+  background: var(--banner-bg); color: var(--banner-fg);
   border-bottom: 1px solid rgba(0,0,0,.12);
 }
+.banner--notice       { --banner-bg: var(--banner-notice-bg);    --banner-fg: var(--banner-notice-fg); }
+.banner--important    { --banner-bg: var(--banner-important-bg); --banner-fg: var(--banner-important-fg); }
+.banner--cancelled { --banner-bg: var(--banner-cancel-bg);    --banner-fg: var(--banner-cancel-fg); }
+
 .banner__inner { display: flex; gap: var(--s3); align-items: baseline; padding: var(--s3) 0; }
 .banner__label { font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .06em; }
 .banner p { margin: 0; max-width: none; }
-.banner a { color: var(--ink-strong); }
+.banner a { color: var(--banner-fg); }
+/* The site-wide focus ring is the amber accent, which is invisible against an
+   amber banner. Inside the banner the ring takes the banner's own text color,
+   which is contrast-checked against its background by construction. */
+.banner a:focus-visible { outline-color: var(--banner-fg); }
 
 /* --- Header ------------------------------------------------------------- */
 .masthead { border-bottom: 1px solid var(--rule); background: var(--surface); }
@@ -74,14 +131,14 @@ img { max-width: 100%; height: auto; }
 .masthead__title { font-weight: 700; color: var(--ink-strong); text-decoration: none; font-size: 1.15rem; line-height: 1.25; }
 .masthead__title span { display: block; font-weight: 400; color: var(--muted); font-size: .9rem; }
 
-.nav { border-bottom: 3px solid var(--accent); background: var(--surface); }
+.nav { border-bottom: 3px solid var(--signature); background: var(--surface); }
 .nav ul { display: flex; flex-wrap: wrap; gap: var(--s1); list-style: none; margin: 0; padding: 0; }
 .nav a {
   display: block; padding: var(--s3) var(--s4);
   color: var(--ink); text-decoration: none; font-weight: 600; border-radius: var(--radius) var(--radius) 0 0;
 }
 .nav a:hover { background: var(--surface-sunk); text-decoration: underline; }
-.nav a[aria-current="page"] { background: var(--ink); color: #fff; }
+.nav a[aria-current] { background: var(--ink); color: #fff; }
 
 /* --- Layout ------------------------------------------------------------- */
 main { padding: var(--s7) 0 var(--s8); }
@@ -96,11 +153,32 @@ main { padding: var(--s7) 0 var(--s8); }
 .grid--offc  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 .card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
-.card__media { aspect-ratio: 37 / 24; background: var(--surface-sunk); display: grid; place-items: center; }
-.card__media img { width: 100%; height: 100%; object-fit: contain; padding: var(--s3); }
-.card__body { padding: var(--s4); }
-.card__body h3 { margin: 0 0 var(--s1); }
-.card__body p { margin: 0; font-size: .95rem; color: var(--muted); }
+/* The panel behind a tile picture. A township whose logo is drawn in white for
+   a dark background can set its own backing color; everyone else falls back
+   to the site's panel, which is what the second value in the var() is for. */
+.card__media { aspect-ratio: 37 / 24; background: var(--tile-bg, var(--surface-sunk)); display: grid; place-items: center; }
+/* No padding: the picture IS the tile, so it fills its frame edge to edge.
+   Anything not proportioned 37:24 is letterboxed against the panel rather than
+   cropped, because a township's name lives inside its picture and cutting the
+   picture could cut the name. */
+.card__media img { width: 100%; height: 100%; object-fit: contain; }
+/* A tile whose whole face is the link. The anchor carries no styling of its
+   own — the card it fills provides all of it — so the hover and focus states
+   are set on the card, which also keeps the focus ring outside the picture
+   rather than clipped by the card's own overflow. */
+.card__link { display: block; position: relative; color: inherit; text-decoration: none; }
+.card__link:focus-visible { outline: none; }
+.card:has(.card__link:hover) { border-color: var(--ink); }
+.card:has(.card__link:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* With no text on the tile the outbound marker has nothing to sit beside, so it
+   takes a corner. It is decoration only — the words "opens in a new tab" are
+   already inside the link for anyone listening to it. */
+.card__link::after {
+  content: "\2197";
+  position: absolute; top: var(--s2); right: var(--s2);
+  font-size: .8rem; line-height: 1; color: var(--muted);
+  background: rgba(255,255,255,.85); border-radius: 999px; padding: .2rem .35rem;
+}
 
 /* --- Announcements ------------------------------------------------------ */
 .posts { list-style: none; margin: 0; padding: 0; }
@@ -118,14 +196,25 @@ main { padding: var(--s7) 0 var(--s8); }
 .rows time, .rows .rows__date { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-strong); min-width: 11rem; }
 .tag { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
        padding: .15rem .5rem; border-radius: 999px; background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--rule); }
-.tag--cancelled { background: #fdecec; color: #8c1d1d; border-color: #f3c9c9; }
-.tag--moved     { background: #fff5e0; color: var(--accent-dark); border-color: #f0dcaa; }
+/* A cancelled or moved meeting is the same signal as a banner of the same name,
+   so each tag is derived from that band's color rather than from a hex written
+   out again here: change a band and its tag follows.
+
+   The text is the band DARKENED rather than the band itself, because one band
+   is light and one is dark and only a darkened form is legible on a pale tint
+   either way. At 55% the pair measure 5.64:1 (moved) and 11.35:1 (cancelled). */
+.tag--cancelled { color:        color-mix(in srgb, var(--banner-cancel-bg) 55%, #000);
+                  background:   color-mix(in srgb, var(--banner-cancel-bg) 10%, #fff);
+                  border-color: color-mix(in srgb, var(--banner-cancel-bg) 32%, #fff); }
+.tag--moved     { color:        color-mix(in srgb, var(--banner-important-bg) 55%, #000);
+                  background:   color-mix(in srgb, var(--banner-important-bg) 10%, #fff);
+                  border-color: color-mix(in srgb, var(--banner-important-bg) 32%, #fff); }
 .year { margin-top: var(--s6); }
 .year h3 { border-bottom: 3px solid var(--accent); display: inline-block; padding-bottom: var(--s1); }
 
 /* --- Officers ----------------------------------------------------------- */
 .officer { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s4); background: var(--surface); }
-.officer__office { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent-dark); }
+.officer__office { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .officer__name { font-size: 1.15rem; margin: var(--s1) 0 var(--s2); }
 .officer dl { margin: 0; font-size: .95rem; }
 .officer dt { font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-top: var(--s2); }
@@ -166,8 +255,6 @@ main { padding: var(--s7) 0 var(--s8); }
    squeezed to half the tile width. Nothing here needs flex.
    The heading keeps its full size; the row abbreviates "Township" to "Twp"
    in the template instead, and the townships page shows names in full. */
-.rail .card__body { min-height: 3.5rem; }
-.rail .card__body h3 { margin: 0; }
 .rail::-webkit-scrollbar { height: 10px; }
 .rail::-webkit-scrollbar-track { background: var(--surface-sunk); border-radius: 999px; }
 .rail::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 999px; }
@@ -181,7 +268,12 @@ main { padding: var(--s7) 0 var(--s8); }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-a[target="_blank"]::after {
+/* The marker belongs beside the words it qualifies. On an ordinary inline link
+   that is the link itself — but a tile whose whole face is the link is a BLOCK,
+   and ::after on a block lands after its last child, stranding the arrow on its
+   own line under the card. So a tile hangs the marker on its heading instead. */
+a[target="_blank"]:not(.card__link)::after,
+.card__link h3::after {
   content: "\00A0\2197";       /* non-breaking space + north-east arrow, so the
                                    marker can never be left alone on a line */
   font-size: .8em;

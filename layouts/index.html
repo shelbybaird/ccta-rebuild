@@ -38,11 +38,18 @@
   <p class="rail__hint">All fourteen members, listed alphabetically. Scroll to see them all.</p>
   <ul class="rail">
     {{ range .Pages.ByWeight }}
+    {{/* The tile is the picture and nothing else, as on the member townships
+         page. Each image already carries its township's name, so the alt text
+         is the link's only name and must never be empty. */}}
+    {{ $tileBg := "" }}
+    {{ with .Params.tileBackground }}
+      {{ if findRE "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" . }}{{ $tileBg = . }}{{ end }}
+    {{ end }}
     <li class="card">
-      <div class="card__media"><img src="{{ partial "asset.html" .Params.image }}" alt="" loading="lazy"></div>
-      <div class="card__body">{{/* Abbreviated for this compact row only. The member townships page
-                 carries every name in full. */}}
-              <h3><a href="{{ .Params.url_ }}" target="_blank" rel="noopener">{{ replace .Title "Township" "Twp" }}{{ partial "newtab-note.html" . }}</a></h3></div>
+      <a class="card__link" href="{{ .Params.url_ }}" target="_blank" rel="noopener">
+        <div class="card__media"{{ with $tileBg }} style="{{ printf "--tile-bg:%s" . | safeCSS }}"{{ end }}><img src="{{ partial "asset.html" .Params.image }}" alt="{{ .Title }}" loading="lazy"></div>
+        {{ partial "newtab-note.html" . }}
+      </a>
     </li>
     {{ end }}
   </ul>

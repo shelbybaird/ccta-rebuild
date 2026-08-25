@@ -3,12 +3,28 @@
 <p class="lede">The fourteen townships of Clermont County. Each link goes to that township's own website.</p>
 <ul class="grid grid--twp">
   {{ range .Pages.ByWeight }}
+  {{/* The tile is the picture and nothing else. Each image already carries its
+       township's name, so a heading beneath it would only say the same thing a
+       second time — and the images vary enough in shape that a row of them plus
+       captions never settled into a grid. The whole tile is one link, and one
+       tab stop.
+
+       Because nothing but the picture remains, THE ALT TEXT IS THE LINK'S ONLY
+       NAME. It has to carry the township, and must never be left empty. */}}
+    {{/* A backing color is only written into the page after it has been proved
+         to BE a color. Go refuses interpolated content in a style attribute —
+         it emits ZgotmplZ rather than trust it — and safeCSS is how that refusal
+         is lifted, so the check has to happen here or not at all. Anything that
+         fails simply falls back to the site's own panel. */}}
+    {{ $tileBg := "" }}
+    {{ with .Params.tileBackground }}
+      {{ if findRE "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" . }}{{ $tileBg = . }}{{ end }}
+    {{ end }}
   <li class="card">
-    <div class="card__media"><img src="{{ partial "asset.html" .Params.image }}" alt="" loading="lazy"></div>
-    <div class="card__body">
-      <h3><a href="{{ .Params.url_ }}" target="_blank" rel="noopener">{{ .Title }}{{ partial "newtab-note.html" . }}</a></h3>
-      <p>{{ replaceRE "^https?://(www\\.)?" "" (strings.TrimSuffix "/" .Params.url_) }}</p>
-    </div>
+    <a class="card__link" href="{{ .Params.url_ }}" target="_blank" rel="noopener">
+      <div class="card__media"{{ with $tileBg }} style="{{ printf "--tile-bg:%s" . | safeCSS }}"{{ end }}><img src="{{ partial "asset.html" .Params.image }}" alt="{{ .Title }}" loading="lazy"></div>
+      {{ partial "newtab-note.html" . }}
+    </a>
   </li>
   {{ end }}
 </ul>

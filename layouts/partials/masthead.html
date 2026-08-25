@@ -12,7 +12,15 @@
       {{/* Labels come from each section's own title field — change it there and
            the heading and this menu move together. */}}
       {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
-        <li><a href="{{ .RelPermalink }}"{{ if $.IsDescendant . }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+        {{/* A page is NOT a descendant of itself, so testing descent alone
+             marked a section's children and missed the section's own page —
+             the menu lit up on an announcement and went dark on the list of
+             them. The two cases also deserve different words: "page" is this
+             exact page, "true" is somewhere inside this section. Both are
+             highlighted, and a screen reader is told which is which. */}}
+        {{ $here := "" }}
+        {{ if eq $ . }}{{ $here = "page" }}{{ else if $.IsDescendant . }}{{ $here = "true" }}{{ end }}
+        <li><a href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ .Title }}</a></li>
       {{ end }}{{ end }}
     </ul>
   </div>

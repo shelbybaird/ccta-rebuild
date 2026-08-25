@@ -10,9 +10,30 @@
   {{ with .Params.announcement }}
     {{ with site.GetPage . }}{{ $target = .RelPermalink }}{{ end }}
   {{ end }}
-<div class="banner">
+  {{/* Two separate things, and only one of them is constrained.
+
+       The KIND chooses the color, and it comes from a fixed list because a
+       color chosen freely can land anywhere on the contrast scale. A name this
+       file does not recognize is only reachable by editing the file by hand,
+       since the editor offers a list; it warns and falls back to a plain notice
+       rather than letting the message go unstyled.
+
+       The WORD at the front is content, not presentation. It carries the
+       meaning to a reader who does not see the color, which is why it is
+       always shown — but no word can fail a contrast check, so nothing is
+       gained by fixing it. Each kind supplies the usual word, and an officer
+       may write a different one when the usual word is not the right one. The
+       color is the same either way. */}}
+  {{ $kinds := dict "notice" "Notice" "important" "Important" "cancelled" "Cancelled" }}
+  {{ $kind := default "notice" .Params.noticeKind }}
+  {{ if not (index $kinds $kind) }}
+    {{ warnf "Banner: %q is not a kind of notice this site knows about; showing it as a plain notice." $kind }}
+    {{ $kind = "notice" }}
+  {{ end }}
+  {{ $label := default (index $kinds $kind) .Params.noticeLabel }}
+<div class="banner banner--{{ $kind }}">
   <div class="wrap banner__inner">
-    <span class="banner__label">Notice</span>
+    <span class="banner__label">{{ $label }}</span>
     <p>{{ if $target }}<a href="{{ $target }}">{{ $message }}</a>{{ else }}{{ $message }}{{ end }}</p>
   </div>
 </div>

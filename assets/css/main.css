@@ -36,9 +36,11 @@
      both meant nothing lifted off anything and the whole page glared at one
      brightness. The ground is warmed and dimmed; cards, the masthead and the
      navigation stay white and now sit ON it. */
-  --ground:          #faf7f2;   /* emits 93% of pure white's light */
+  --ground:          #f8f4ee;   /* emits 91% of pure white's light */
   --surface:         #ffffff;
+  --surface-lift:    #fdfbf8;   /* 97% — a panel that sits above the ground */
   --surface-sunk:    #f2efe7;   /* 86% — a real step below the ground, and warm with it */
+  --foot-bg:         #ece7db;   /* 80% — the footer alone, so nav hover and tiles stay put */
   --link:            #1b4b8f;
   --link-visited:    #5c3d8f;
 
@@ -221,12 +223,12 @@ main { padding: var(--s7) 0 var(--s8); }
 .officer dd { margin: 0; }
 
 /* --- Notices ------------------------------------------------------------ */
-.note { background: var(--surface-sunk); border-left: 4px solid var(--accent); padding: var(--s4); border-radius: 0 var(--radius) var(--radius) 0; }
+.note { background: var(--surface-lift); border: 1px solid var(--rule); border-left: 4px solid var(--accent); box-shadow: var(--shadow); padding: var(--s4); border-radius: 0 var(--radius) var(--radius) 0; }
 .note p:last-child { margin-bottom: 0; }
 .empty { color: var(--muted); font-style: italic; }
 
 /* --- Footer ------------------------------------------------------------- */
-.foot { border-top: 1px solid var(--rule); background: var(--surface-sunk); padding: var(--s6) 0; margin-top: var(--s8); font-size: .95rem; color: var(--muted); }
+.foot { border-top: 1px solid var(--rule); background: var(--foot-bg); padding: var(--s6) 0; margin-top: var(--s8); font-size: .95rem; color: var(--body); }
 .foot p { max-width: none; }
 .foot__built { font-size: .85rem; }
 

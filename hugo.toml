@@ -4,7 +4,7 @@
 baseURL = "https://cctownship.org/"
 
 title            = "Clermont County Township Association"
-languageCode     = "en-us"
+locale           = "en-us"
 defaultContentLanguage = "en"
 
 # LOAD-BEARING. Without this, dates typed by an officer are read as UTC, which

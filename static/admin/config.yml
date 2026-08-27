@@ -150,6 +150,9 @@ collections:
       # and the shape its own image field is expected to grow into. Adopting it
       # now costs nothing: no announcement carries a photograph yet.
       # See sveltia/sveltia-cms discussion #802 and issue #936.
+      # The object stays optional so an announcement without a photograph saves
+      # normally, but its subfields are required, so once a photograph is added
+      # it cannot be saved without a description.
       - label: Photograph
         name: image
         widget: object
@@ -159,17 +162,17 @@ collections:
           - label: File
             name: src
             widget: image
-            required: false
+            required: true
             media_folder: /static/uploads
             public_folder: /uploads
           - label: Describe the photograph
             name: alt
             widget: string
-            required: false
+            required: true
             hint: >-
               What somebody would need told if they could not see it. This is
-              read aloud in place of the picture. Leave it empty only when the
-              photograph adds nothing the announcement does not already say.
+              read aloud in place of the picture. An announcement with no
+              photograph does not need this; a photograph does.
 
       - label: Files
         name: attachments

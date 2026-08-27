@@ -1,0 +1,23 @@
+# Which files are sensitive enough to want a second pair of eyes, and which are
+# not. Content is not listed here: an announcement, a set of minutes or a roster
+# change publishes without review, which is the whole point of the editor.
+#
+# What is listed is the machinery — how the site is built, deployed, and
+# presented to the person editing it. A change here can stop the site
+# publishing, or publish something nobody meant to.
+#
+# ⚠ NOTHING ENFORCES THIS YET, AND THAT IS DELIBERATE.
+#
+# The branch protection rule that would enforce it requires a review from a code
+# owner, and GitHub does not accept a code owner's approval of their own pull
+# request. On a repository with one maintainer that rule blocks every change,
+# including the maintainer's own — the same trap as a review queue on ordinary
+# content, arriving by a different door.
+#
+# So this file records the intent and waits. Enable "Require review from Code
+# Owners" on the default branch at the point a second person holds write access,
+# which is execution plan task 6.2.
+
+/.github/                 @shelbybaird
+/static/admin/config.yml  @shelbybaird
+/hugo.toml                @shelbybaird

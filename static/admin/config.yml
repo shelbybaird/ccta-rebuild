@@ -24,11 +24,12 @@ backend:
   # exists. Until then the editor runs against the local repository, which
   # performs no Git operation and needs no authentication.
 
-# Saving an entry opens a pull request rather than changing the published site.
-# A second officer publishes it by merging, and neither of them sees Git: the
-# editor presents this as a status to move a card between.
-# This is a remote workflow. It does nothing in the local repository workflow.
-publish_mode: editorial_workflow
+# An entry saved here publishes. There is deliberately no review queue in
+# between, because the execution plan reserves a second approval for changes to
+# how the site is built and not for ordinary content, and because a review step
+# that only one person can perform is a step that person performs on their own
+# work. Every save remains a commit, so nothing is lost and anything can be put
+# back. Turning a queue on later is one line: `publish_mode: editorial_workflow`.
 
 # Uploads land in one place. Documents already on the server keep their existing
 # paths so that links to them continue to resolve; only new uploads come here.

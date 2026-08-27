@@ -142,6 +142,32 @@ img { max-width: 100%; height: auto; }
 .nav a:hover { background: var(--surface-sunk); text-decoration: underline; }
 .nav a[aria-current] { background: var(--ink); color: #fff; }
 
+/* The menu stays put while a long page scrolls under it. Ninety entries into
+   the minutes, a reader can still leave for another section without scrolling
+   back to the top or reaching for the browser's Back button.
+
+   Only the menu is pinned, not the masthead above it: the masthead carries the
+   logo and the meeting line and would take a third of a telephone screen. It
+   scrolls away, the menu locks to the top, and the whole width stays available
+   for reading.
+
+   z-index sits below the skip link's 100, so focusing "Skip to content" still
+   puts that link above everything else. */
+.nav { position: sticky; top: 0; z-index: 50; }
+
+/* Anything scrolled to by an in-page link — "Skip to content" above all — has
+   to clear the pinned menu, or it arrives underneath it and looks like nothing
+   happened. Generous on purpose: the menu wraps to more rows on a narrow
+   screen, and landing a little low costs nothing where landing high hides the
+   thing being linked to. */
+:target, #main, h1, h2, h3 { scroll-margin-top: 6rem; }
+
+/* A telephone held sideways has little height to spare, and there a pinned menu
+   costs more room than it gives back. */
+@media (max-height: 32rem) {
+  .nav { position: static; }
+}
+
 /* --- Layout ------------------------------------------------------------- */
 main { padding: var(--s7) 0 var(--s8); }
 .lede { font-size: 1.15rem; color: var(--muted); max-width: var(--measure); }

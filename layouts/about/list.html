@@ -1,0 +1,30 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+
+{{/* The Association's own published purpose statement. It sat on the home page
+     until the About page existed; the home page now opens on what is current
+     rather than on a standing description.
+
+     Two words differ from the Association's published wording: "the township"
+     for "townships" in the first clause, and "possesses" for "possess". Both
+     were grammatical errors in the source, corrected on the Secretary's
+     instruction on 27 August 2026. The statement is otherwise exact.
+
+     This statement carries two of the five purposes Article IV sets out. It
+     drops acquaintance among township officials, knowledge of their rights and
+     duties, and enabling legislation. Whether this page should carry Article IV
+     in full, this condensation, or a fuller summary is an editorial decision
+     for the officers, and it is not yet made. */}}
+<p class="lede">The purpose of the Clermont County Township Association is to protect the township against any attempt to abolish it as a governmental unit, resist efforts to further centralize governmental powers by depriving the township of any rights, duties, or privileges, which it now possesses, and secure an equitable share of gasoline tax revenue.</p>
+
+{{/* The roster is shown here as well as on its own page. Its entries still live
+     in content/officers/ and are still edited there, and /officers/ still
+     resolves, so nothing that linked to it has broken. */}}
+{{ with site.GetPage "/officers" }}
+<section class="section">
+  <h2>Officers</h2>
+  <p>The offices are those established by Article V of the constitution. One entry is kept per term of office, so the roster is a record rather than a page that overwrites itself.</p>
+  {{ partial "officer-roster.html" .Pages }}
+</section>
+{{ end }}
+{{ end }}

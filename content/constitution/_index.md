@@ -1,6 +1,6 @@
 ---
 title: "Constitution"
-weight: 50
+weight: 60
 # This page renders. Its ENTRIES do not — the cascade below applies to
 # descendants, and the explicit block above it keeps this list page itself.
 build:

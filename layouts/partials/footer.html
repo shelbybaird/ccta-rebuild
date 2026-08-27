@@ -8,7 +8,7 @@
       <ul>
         <li><a href="{{ site.Home.RelPermalink }}">Home</a></li>
         {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
-        <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+        <li><a href="{{ .RelPermalink }}">{{ default .Title .Params.menuLabel }}</a></li>
         {{ end }}{{ end }}
       </ul>
     </nav>

@@ -26,7 +26,13 @@
              highlighted, and a screen reader is told which is which. */}}
         {{ $here := "" }}
         {{ if eq $ . }}{{ $here = "page" }}{{ else if $.IsDescendant . }}{{ $here = "true" }}{{ end }}
-        <li><a href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ .Title }}</a></li>
+        {{/* A section may carry a shorter `menuLabel` for navigation, because
+             seven full titles wrap to three rows on a telephone and the menu is
+             pinned. The page's own heading still uses the full title: it is the
+             navigation that needs to be brief, not the page. Both navigation
+             mechanisms use the same short word, so a reader never meets the
+             same destination under two different names. */}}
+        <li><a href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ default .Title .Params.menuLabel }}</a></li>
       {{ end }}{{ end }}
     </ul>
   </div>

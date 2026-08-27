@@ -80,7 +80,7 @@ output:
 collections:
   # ─── Announcements ──────────────────────────────────────────────────────────
   - name: news
-    label: Announcements
+    label: News & Announcements
     label_singular: Announcement
     icon: campaign
     folder: /content/news

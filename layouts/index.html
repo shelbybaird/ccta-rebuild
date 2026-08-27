@@ -1,6 +1,5 @@
 {{ define "main" }}
 <h1>Clermont County Township Association</h1>
-<p class="lede">The purpose of the Clermont County Township Association is to protect townships against any attempt to abolish it as a governmental unit, resist efforts to further centralize governmental powers by depriving the township of any rights, duties, or privileges, which it now possess, and secure an equitable share of gasoline tax revenue.</p>
 
 {{ with (where (where site.RegularPages "Section" "meetings") "Date" "ge" now).Reverse }}
   {{ with index . 0 }}

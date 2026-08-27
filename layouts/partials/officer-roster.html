@@ -1,0 +1,52 @@
+{{/* The officer roster, rendered wherever it is needed. It lives here rather
+     than in one page's template because the About page and the roster page
+     both show it, and two copies of this logic would drift.
+
+     Takes the roster pages as the dot. */}}
+<ul class="grid grid--offc">
+  {{/* ORDER. The roster reads in Article V's own sequence. That order is the
+       constitution's rather than an editorial preference, so it is worked out
+       from the office instead of kept as a number somebody has to maintain,
+       and there is nothing here for an editor to put out of order.
+
+       SERVING. An officer is serving when the term has no end. That is tested
+       as EMPTY rather than ABSENT, because an editing tool writes an untouched
+       optional field back with nothing in it, and an officer must not vanish
+       over the difference between the two. */}}
+  {{ $offices := slice "President" "Vice-President" "Secretary" "Treasurer" "Executive Committee-person" }}
+  {{ $roster := . }}
+  {{ $serving := slice }}
+  {{ range $roster }}{{ if not .Params.termEnd }}{{ $serving = $serving | append . }}{{ end }}{{ end }}
+
+  {{/* An office outside Article V's five can only be entered by editing a file
+       by hand, since the form offers those five alone. It is added to the end
+       of the order rather than dropped, because an officer must never disappear
+       unnoticed — which is a failure this page has already had once. */}}
+  {{ $order := $offices }}
+  {{ range $serving }}{{ if not (in $order .Params.office) }}{{ $order = $order | append .Params.office }}{{ end }}{{ end }}
+
+  {{ partial "officer-roster-check.html" (dict "offices" $order "serving" $serving) }}
+
+  {{/* One person holding two offices is shown as one entry naming both, which
+       is what the Association's arrangement has looked like for years. Nothing
+       is combined in the files: each term of office remains its own entry, so
+       the day the two offices go to two people the cards separate on their own
+       with no change to this site. Setting combineSharedOffices to false shows
+       every office as its own card instead. */}}
+  {{ $done := slice }}
+  {{ range $order }}
+    {{ $office := . }}
+    {{ range where $serving "Params.office" $office }}
+      {{ $person := .Params.name }}
+      {{ if not (in $done $person) }}
+        {{ $held := slice . }}
+        {{ if site.Params.combineSharedOffices }}
+          {{ $held = slice }}
+          {{ range $order }}{{ range where $serving "Params.office" . }}{{ if eq .Params.name $person }}{{ $held = $held | append . }}{{ end }}{{ end }}{{ end }}
+          {{ $done = $done | append $person }}
+        {{ end }}
+        {{ partial "officer-card.html" (dict "entries" $held) }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+</ul>

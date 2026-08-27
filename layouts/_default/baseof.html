@@ -6,6 +6,9 @@
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} — {{ site.Title }}{{ end }}</title>
   <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Title }}{{ end }}">
   <link rel="canonical" href="{{ .Permalink }}">
+  {{/* Fail-safe: anything other than the string true keeps the page out of
+       search results, so a preview is never indexed by omission. */}}
+  {{ if ne (printf "%v" site.Params.indexable) "true" }}<meta name="robots" content="noindex, nofollow">{{ end }}
   {{ with resources.Get "css/main.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
   {{ end }}

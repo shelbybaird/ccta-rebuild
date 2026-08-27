@@ -1,10 +1,16 @@
 # Builds the site and publishes it to GitHub Pages.
 #
-# Three things start a build:
+# Two things start a build:
 #   - a change pushed to main, so editing content publishes the site;
-#   - a timer, so content that is only supposed to show between two dates
-#     appears and disappears without anybody pushing anything;
 #   - a button, for when somebody wants a build now.
+#
+# There is deliberately NO timer. Hugo decides what to publish from the dates
+# on a piece of content, but it decides that during a build, so a display
+# window only takes effect when something builds. GitHub's scheduled trigger
+# delivered one run in seventeen on 27 August 2026, and did so without
+# reporting a failure of any kind. A trigger that quietly does not fire is
+# worse than none: it invites the site to be described as self-maintaining
+# when it is not. The dates still work. Nothing re-evaluates them on its own.
 #
 # Nothing here is built from a third party's moving target. Hugo is fetched at a
 # fixed version and checked against the checksum its authors published, and each
@@ -16,31 +22,6 @@ name: Publish
 on:
   push:
     branches: [main]
-  schedule:
-    # TEMPORARY, FOR MEASUREMENT. Every ten minutes.
-    #
-    # This is not the intended setting. It is here to measure how often a
-    # scheduled run is actually delivered, because so far almost none have
-    # been. Of the seventeen hourly windows that elapsed on 27 August 2026,
-    # one produced a run, and that one arrived nine minutes late. Ten-minute
-    # spacing turns a measurement that takes a day into one that takes an
-    # hour.
-    #
-    # The interval is itself the experiment. If delivery gets worse at ten
-    # minutes, that points at runs being discarded once they are delayed past
-    # their next occurrence, which would punish short intervals specifically.
-    # If it stays near six percent, the loss is indifferent to spacing. If it
-    # improves, something was particular to the previous slot.
-    #
-    # RESTORE "37 * * * *" WHEN THE MEASUREMENT IS DONE, for the reasons that
-    # chose it: "show from" on an announcement carries an hour and a minute,
-    # so a notice can be set for two in the afternoon, and an hourly rebuild
-    # is the coarsest one that can honor that. Thirty-seven minutes past
-    # avoids the hour and the quarter hours, where scheduled runs are most
-    # often delayed. Hourly also removes the daylight-saving pair an
-    # absolute-time schedule would need to stay near Ohio midnight in both
-    # halves of the year.
-    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 # Nothing is granted by default; each job asks for only what it needs.

@@ -17,12 +17,21 @@ on:
   push:
     branches: [main]
   schedule:
-    # Twice, ten minutes after 04:00 and 05:00 UTC. Ohio is four hours behind
-    # UTC in summer and five in winter, so one of these two lands just after
-    # local midnight whichever half of the year it is, and the other is a
-    # harmless extra. A notice that stops showing at the end of a day is
-    # therefore gone within about ten minutes of that day ending.
-    - cron: "10 4,5 * * *"
+    # Hourly, at thirty-seven minutes past.
+    #
+    # WHY HOURLY. "Show from" on an announcement carries an hour and a minute,
+    # so a notice can be set for two in the afternoon. A twice-daily rebuild
+    # could not honor that: the notice would not have appeared until after
+    # midnight, up to twenty-two hours late and with nothing to notice. Expiry
+    # is only ever day-granular and did not need this, but publication does.
+    #
+    # WHY :37. Scheduled runs are most often delayed or dropped on the hour and
+    # the quarter hours. The twice-daily schedule this replaced sat at :10 and
+    # never fired at all — neither window, on 27 August 2026.
+    #
+    # Hourly also removes the daylight-saving pair the old schedule needed to
+    # land near Ohio midnight in both halves of the year.
+    - cron: "37 * * * *"
   workflow_dispatch:
 
 # Nothing is granted by default; each job asks for only what it needs.

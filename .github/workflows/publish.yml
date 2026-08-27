@@ -100,19 +100,38 @@ jobs:
           # must carry the noindex tag and robots.txt must disallow everything;
           # if either is missing the build stops rather than publishing a site
           # that search engines are free to take.
+          #
+          # The pattern tolerates an unquoted attribute value because --minify
+          # rewrites name="robots" as name=robots. Matching only the quoted form
+          # failed a correct build once already.
           if [ "$INDEXABLE" = "true" ]; then
             echo "Public build: indexing is intended, nothing to assert."
             exit 0
           fi
-          if ! grep -q 'name="robots" content="noindex' public/index.html; then
-            echo "::error::preview build is missing the noindex tag" >&2
+          total=0
+          missing=0
+          while IFS= read -r page; do
+            total=$((total + 1))
+            if ! grep -Eq '<meta[^>]+name="?robots"?[^>]*noindex' "$page"; then
+              echo "::error file=${page}::page carries no noindex tag"
+              missing=$((missing + 1))
+            fi
+          done < <(find public -type f -name '*.html')
+          # A check that examined nothing would otherwise pass, which is the way
+          # this kind of guard usually fails.
+          if [ "$total" -eq 0 ]; then
+            echo "::error::no pages were built, so nothing was checked" >&2
+            exit 1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::${missing} of ${total} pages carry no noindex tag" >&2
             exit 1
           fi
           if ! grep -q '^Disallow: /$' public/robots.txt; then
             echo "::error::preview build's robots.txt does not disallow crawling" >&2
             exit 1
           fi
-          echo "Preview build: noindex tag and robots.txt disallow both present."
+          echo "Preview build: all ${total} pages carry noindex, robots.txt disallows crawling."
 
       - name: Package the site for publishing
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4

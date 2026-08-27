@@ -1,0 +1,134 @@
+# Builds the site and publishes it to GitHub Pages.
+#
+# Three things start a build:
+#   - a change pushed to main, so editing content publishes the site;
+#   - a timer, so content that is only supposed to show between two dates
+#     appears and disappears without anybody pushing anything;
+#   - a button, for when somebody wants a build now.
+#
+# Nothing here is built from a third party's moving target. Hugo is fetched at a
+# fixed version and checked against the checksum its authors published, and each
+# action is pinned to the exact commit it was reviewed at rather than to a tag,
+# because a tag can be moved to point at different code.
+
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Twice, ten minutes after 04:00 and 05:00 UTC. Ohio is four hours behind
+    # UTC in summer and five in winter, so one of these two lands just after
+    # local midnight whichever half of the year it is, and the other is a
+    # harmless extra. A notice that stops showing at the end of a day is
+    # therefore gone within about ten minutes of that day ending.
+    - cron: "10 4,5 * * *"
+  workflow_dispatch:
+
+# Nothing is granted by default; each job asks for only what it needs.
+permissions: {}
+
+# One publish at a time, and never cancel one that is already running: a
+# cancelled deployment can leave the live site mid-swap.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: "0.165.0"
+  HUGO_SHA256: "f43494894cdf4a8630a201d5c828051c77f523cc66bb3938b30806835470ac20"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0          # Hugo reads git history for page dates.
+
+      - name: Work out the address this build will be served from
+        id: pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Install Hugo, and refuse to continue if it is not the file expected
+        run: |
+          set -euo pipefail
+          file="hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          curl -sSL --fail --retry 3 \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${file}" \
+            -o "$file"
+          echo "${HUGO_SHA256}  ${file}" | sha256sum --check --strict
+          tar -xzf "$file" hugo
+          sudo install -m 0755 hugo /usr/local/bin/hugo
+          hugo version
+
+      - name: Decide whether this build may be indexed by search engines
+        id: indexable
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          # Only the Association's own domain is offered to search engines. Any
+          # other address — a github.io preview above all — is a work in
+          # progress and is published with a noindex tag and a robots.txt that
+          # asks crawlers to stay out. The test is on the host alone, so the day
+          # the domain is pointed at this site indexing begins by itself.
+          host="$(printf '%s' "$BASE_URL" | sed -E 's#^https?://##; s#[:/].*$##')"
+          if [ "$host" = "cctownship.org" ] || [ "$host" = "www.cctownship.org" ]; then
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Serving from ${BASE_URL} (host ${host})"
+
+      - name: Build the site
+        env:
+          HUGO_BASEURL: ${{ steps.pages.outputs.base_url }}
+          HUGO_PARAMS_INDEXABLE: ${{ steps.indexable.outputs.value }}
+          TZ: America/New_York
+        run: hugo --minify --gc --destination public
+
+      - name: Fail if a preview build would have been indexable
+        env:
+          INDEXABLE: ${{ steps.indexable.outputs.value }}
+        run: |
+          set -euo pipefail
+          # The check that proves the check works. On a preview build every page
+          # must carry the noindex tag and robots.txt must disallow everything;
+          # if either is missing the build stops rather than publishing a site
+          # that search engines are free to take.
+          if [ "$INDEXABLE" = "true" ]; then
+            echo "Public build: indexing is intended, nothing to assert."
+            exit 0
+          fi
+          if ! grep -q 'name="robots" content="noindex' public/index.html; then
+            echo "::error::preview build is missing the noindex tag" >&2
+            exit 1
+          fi
+          if ! grep -q '^Disallow: /$' public/robots.txt; then
+            echo "::error::preview build's robots.txt does not disallow crawling" >&2
+            exit 1
+          fi
+          echo "Preview build: noindex tag and robots.txt disallow both present."
+
+      - name: Package the site for publishing
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

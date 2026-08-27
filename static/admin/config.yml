@@ -145,21 +145,31 @@ collections:
           One or two sentences. Shown on the announcements list and on the home
           page, and used when the address is shared.
 
+      # The image and its description are grouped rather than sitting side by
+      # side, because that is the shape Sveltia documents for carrying alt text
+      # and the shape its own image field is expected to grow into. Adopting it
+      # now costs nothing: no announcement carries a photograph yet.
+      # See sveltia/sveltia-cms discussion #802 and issue #936.
       - label: Photograph
         name: image
-        widget: image
+        widget: object
         required: false
-        media_folder: /static/uploads
-        public_folder: /uploads
-
-      - label: Describe the photograph
-        name: imageAlt
-        widget: string
-        required: false
-        hint: >-
-          What somebody would need told if they could not see it. This is read
-          aloud in place of the picture. Leave it empty only when the
-          photograph adds nothing the announcement does not already say.
+        collapsed: false
+        fields:
+          - label: File
+            name: src
+            widget: image
+            required: false
+            media_folder: /static/uploads
+            public_folder: /uploads
+          - label: Describe the photograph
+            name: alt
+            widget: string
+            required: false
+            hint: >-
+              What somebody would need told if they could not see it. This is
+              read aloud in place of the picture. Leave it empty only when the
+              photograph adds nothing the announcement does not already say.
 
       - label: Files
         name: attachments

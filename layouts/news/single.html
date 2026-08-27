@@ -18,10 +18,12 @@
        Presidents tells every reader something untrue. Stopping the whole site
        over a photograph would be the larger harm. */}}
   {{ with .Params.image }}
-    {{ if not $.Params.imageAlt }}
-      {{ warnf "Announcement %q carries a photograph with no description, so it is published as though it were decorative. If the picture says anything the words do not, fill in \"Describe the photograph\" in the editor. File: %s" $.Title $.File.Path }}
+    {{ with .src }}
+      {{ if not $.Params.image.alt }}
+        {{ warnf "Announcement %q carries a photograph with no description, so it is published as though it were decorative. If the picture says anything the words do not, fill in \"Describe the photograph\" in the editor. File: %s" $.Title $.File.Path }}
+      {{ end }}
+      <img src="{{ partial "asset.html" . }}" alt="{{ $.Params.image.alt }}">
     {{ end }}
-    <img src="{{ partial "asset.html" . }}" alt="{{ $.Params.imageAlt }}">
   {{ end }}
   {{ .Content }}
   {{/* Files hosted here for download. A post may carry any number of them.

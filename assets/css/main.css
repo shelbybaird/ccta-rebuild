@@ -137,6 +137,10 @@ img { max-width: 100%; height: auto; }
 .nav ul { display: flex; flex-wrap: wrap; gap: var(--s1); list-style: none; margin: 0; padding: 0; }
 .nav a {
   display: block; padding: var(--s3) var(--s4);
+  /* A menu label is one word, not a paragraph. Without this it inherits the
+     body's reading line-height of 1.65, which adds more height to every tab
+     than the padding does and is the reason the menu reads as over-padded. */
+  line-height: 1.2;
   color: var(--ink); text-decoration: none; font-weight: 600; border-radius: var(--radius) var(--radius) 0 0;
 }
 .nav a:hover { background: var(--surface-sunk); text-decoration: underline; }
@@ -262,7 +266,6 @@ main { padding: var(--s7) 0 var(--s8); }
 
 @media (max-width: 640px) {
   .masthead__inner { padding: var(--s3) 0; }
-  .nav a { padding: var(--s2) var(--s3); }
   .rows time, .rows .rows__date { min-width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

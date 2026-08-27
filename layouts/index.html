@@ -34,7 +34,7 @@
 
 {{ with site.GetPage "/townships" }}
 <section class="section">
-  <div class="section__head"><h2>{{ .Title }}</h2><a href="{{ .RelPermalink }}">All fourteen</a></div>
+  <div class="section__head"><h2>{{ .Title }}</h2><a href="{{ .RelPermalink }}">All fourteen townships</a></div>
   <p class="rail__hint">All fourteen members, listed alphabetically. Scroll to see them all.</p>
   <ul class="rail">
     {{ range .Pages.ByWeight }}

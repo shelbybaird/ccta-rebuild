@@ -1,6 +1,12 @@
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <a class="masthead__logo" href="{{ site.Home.RelPermalink }}"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
+    {{/* The logo and the title beside it are two links to the same place. Giving
+         the logo alt text would name it correctly but announce the same
+         destination twice in a row, so the logo is taken out of the reading
+         order and the tab order instead, and the title link is the one name
+         this destination has. Removing aria-hidden without also giving the
+         image alt text restores a link with no accessible name. */}}
+    <a class="masthead__logo" href="{{ site.Home.RelPermalink }}" aria-hidden="true" tabindex="-1"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
     <a class="masthead__title" href="{{ site.Home.RelPermalink }}">Clermont County Township Association
       <span>Meets the {{ site.Params.meetingDay }} of the month, {{ site.Params.meetingTime }}</span></a>
   </div>

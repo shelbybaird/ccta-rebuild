@@ -1,5 +1,17 @@
 <footer class="foot">
   <div class="wrap">
+    {{/* A second way to reach every section. The main menu was the only one,
+         which leaves a reader who cannot use it with no other route. The list
+         is generated from the same sections in the same order, so a section
+         added later appears in both places without anybody remembering to. */}}
+    <nav class="foot__map" aria-label="All sections">
+      <ul>
+        <li><a href="{{ site.Home.RelPermalink }}">Home</a></li>
+        {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
+        <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+        {{ end }}{{ end }}
+      </ul>
+    </nav>
     <p>&copy; {{ now.Format "2006" }} Clermont County Township Association</p>
     <p class="foot__built">This page was last rebuilt {{ now.Format "2 January 2006 at 3:04 pm" }} Eastern.</p>
   </div>

@@ -2,7 +2,27 @@
 <article>
   <span class="post__date">{{ .Date.Format "2 January 2006" }}</span>
   <h1>{{ .Title }}</h1>
-  {{ with .Params.image }}<img src="{{ partial "asset.html" . }}" alt="">{{ end }}
+  {{/* The description is what a reader using a screen reader hears in place of
+       the photograph. Left empty it stays empty, which is correct for a picture
+       that carries no information the words do not, and wrong for one that
+       does.
+
+       The editing tool cannot enforce this. Sveltia's image widget stores a
+       path and nothing else — it has no description of its own — and it offers
+       no way to make one field required because another was filled in. So the
+       description is a separate optional field, and the only place the pair can
+       be seen together is here.
+
+       A warning rather than an error, unlike the officer roster check: a
+       missing description reaches some readers badly, where a roster naming two
+       Presidents tells every reader something untrue. Stopping the whole site
+       over a photograph would be the larger harm. */}}
+  {{ with .Params.image }}
+    {{ if not $.Params.imageAlt }}
+      {{ warnf "Announcement %q carries a photograph with no description, so it is published as though it were decorative. If the picture says anything the words do not, fill in \"Describe the photograph\" in the editor. File: %s" $.Title $.File.Path }}
+    {{ end }}
+    <img src="{{ partial "asset.html" . }}" alt="{{ $.Params.imageAlt }}">
+  {{ end }}
   {{ .Content }}
   {{/* Files hosted here for download. A post may carry any number of them.
        Outbound links to other sources belong in the body above. */}}

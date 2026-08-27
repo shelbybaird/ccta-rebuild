@@ -231,6 +231,8 @@ main { padding: var(--s7) 0 var(--s8); }
 .foot { border-top: 1px solid var(--rule); background: var(--foot-bg); padding: var(--s6) 0; margin-top: var(--s8); font-size: .95rem; color: var(--body); }
 .foot p { max-width: none; }
 .foot__built { font-size: .85rem; }
+.foot__map ul { list-style: none; margin: 0 0 var(--s4); padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.foot__map a { color: var(--body); }
 
 @media (max-width: 640px) {
   .masthead__inner { padding: var(--s3) 0; }

@@ -151,6 +151,15 @@ collections:
         media_folder: /static/uploads
         public_folder: /uploads
 
+      - label: Describe the photograph
+        name: imageAlt
+        widget: string
+        required: false
+        hint: >-
+          What somebody would need told if they could not see it. This is read
+          aloud in place of the picture. Leave it empty only when the
+          photograph adds nothing the announcement does not already say.
+
       - label: Files
         name: attachments
         label_singular: File

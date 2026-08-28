@@ -11,3 +11,5 @@ image:
 ---
 
 This field was required so here is some required text
+
+this I also a [link](https://www.reddit.com/r/DoesAnybodyElse/comments/1hui3dx/dae_feel_like_activities_that_are_supposed_to_be/) to some place

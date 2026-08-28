@@ -90,6 +90,19 @@ jobs:
           TZ: America/New_York
         run: hugo --minify --gc --destination public
 
+      - name: Record when this site next needs rebuilding
+        env:
+          TZ: America/New_York
+        run: |
+          set -euo pipefail
+          # Hugo applies a display window during a build, so a notice due to
+          # appear or disappear does neither until something builds. This
+          # writes the next such moment where anything can read it, so that a
+          # timer elsewhere can ask for a build only when one is actually due
+          # rather than rebuilding the site around the clock on the chance.
+          python3 tools/next-boundary.py content public/status.json
+          cat public/status.json
+
       - name: Fail if a preview build would have been indexable
         env:
           INDEXABLE: ${{ steps.indexable.outputs.value }}

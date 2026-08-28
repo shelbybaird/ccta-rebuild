@@ -1,0 +1,29 @@
+# The OAuth broker that lets an officer sign in to the CMS from the published
+# site. Sveltia's GitHub backend cannot do this alone: GitHub has no client-side
+# PKCE, so the authorization code has to be exchanged for a token somewhere that
+# can hold a client secret. This worker is that somewhere, and it is the only
+# reason a third vendor appears in the design at all.
+
+name = "sveltia-cms-auth"
+main = "src/index.js"
+
+# Held at the upstream value on purpose. A compatibility date selects runtime
+# behavior, and this is the date the vendored source was written and tested
+# against. Moving it forward is a deliberate change with its own verification,
+# not something to carry along with a deployment.
+compatibility_date = "2023-03-24"
+
+[vars]
+# THE SINGLE MOST CONSEQUENTIAL LINE IN THIS FILE. Upstream's own words: it
+# "stops other sites from using your Worker at your expense... and it stops them
+# from obtaining an access token through it, because the authenticator releases a
+# token only to a page served from one of these hostnames."
+#
+# Without it the endpoint mints GitHub tokens for whoever asks. All three
+# hostnames are listed now so that pointing the domain at the site later does not
+# also require remembering to come back here.
+ALLOWED_DOMAINS = "shelbybaird.github.io,cctownship.org,www.cctownship.org"
+
+# GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are NOT here and must never be.
+# They are set as encrypted secrets against the deployed worker, by hand, in the
+# Cloudflare dashboard. This file is committed to a public repository.

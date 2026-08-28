@@ -8,3 +8,8 @@
 
 # macOS
 .DS_Store
+
+# Worker tooling. The deployed code is src/index.js; everything below is local
+# scaffolding wrangler creates while building or running it.
+/worker/node_modules/
+/worker/.wrangler/

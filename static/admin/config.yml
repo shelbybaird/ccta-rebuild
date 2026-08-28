@@ -20,9 +20,16 @@ backend:
   name: github
   repo: shelbybaird/ccta-rebuild
   branch: main
-  # base_url is added at execution plan task 5.2, once the sign-in service
-  # exists. Until then the editor runs against the local repository, which
-  # performs no Git operation and needs no authentication.
+  # Where sign-in is brokered. GitHub will not exchange an authorization code
+  # for a token without a client secret, and a secret cannot live in a page, so
+  # the exchange happens in a small worker of ours rather than at Sveltia's
+  # default of api.netlify.com. Source and reasoning: worker/README.md.
+  base_url: https://sveltia-cms-auth.cctownship.workers.dev
+  # Ask GitHub for the narrowest access that can still edit this site. The
+  # broker's own default is `repo`, which would reach every private repository
+  # an officer owns; this repository is public, so `public_repo` is enough and
+  # signing in here grants nothing beyond it.
+  auth_scope: public_repo
 
 # An entry saved here publishes. There is deliberately no review queue in
 # between, because the execution plan reserves a second approval for changes to

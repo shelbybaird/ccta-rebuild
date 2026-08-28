@@ -13,3 +13,4 @@
 # scaffolding wrangler creates while building or running it.
 /worker/node_modules/
 /worker/.wrangler/
+/tools/__pycache__/

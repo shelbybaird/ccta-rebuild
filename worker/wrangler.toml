@@ -5,7 +5,10 @@
 # reason a third vendor appears in the design at all.
 
 name = "sveltia-cms-auth"
-main = "src/index.js"
+# The entry point composes two unrelated jobs; see src/worker.js. The vendored
+# broker is no longer the entry itself so that it can stay byte-for-byte
+# upstream.
+main = "src/worker.js"
 
 # Held at the upstream value on purpose. A compatibility date selects runtime
 # behavior, and this is the date the vendored source was written and tested
@@ -24,6 +27,30 @@ compatibility_date = "2023-03-24"
 # also require remembering to come back here.
 ALLOWED_DOMAINS = "shelbybaird.github.io,cctownship.org,www.cctownship.org"
 
-# GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are NOT here and must never be.
+# What the timer reads and what it asks. None of this is secret: the status
+# file is public by design, and the repository it names is public too.
+STATUS_URL = "https://shelbybaird.github.io/ccta-rebuild/status.json"
+REPO = "shelbybaird/ccta-rebuild"
+WORKFLOW_FILE = "publish.yml"
+REF = "main"
+
+# Every fifteen minutes. On almost every tick this reads one small file and
+# stops, costing nothing further. Fifteen also clears the ten minutes of cache
+# the status file is served with, so a shorter interval would buy repetition
+# rather than accuracy. 96 runs a day against an allowance of 100,000.
+[triggers]
+crons = ["*/15 * * * *"]
+
+# A timer that stops is the failure this worker exists to correct, so the timer
+# itself must not fail quietly. With logs retained, every tick leaves a line
+# saying what it decided, and the absence of those lines is a symptom somebody
+# can see. Cloudflare keeps them for a few days at no cost on this plan, which
+# is long enough to answer "is it still running" and too short to be a record
+# of anything.
+[observability]
+enabled = true
+
+# GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET and GITHUB_DISPATCH_TOKEN are NOT
+# here and must never be.
 # They are set as encrypted secrets against the deployed worker, by hand, in the
 # Cloudflare dashboard. This file is committed to a public repository.

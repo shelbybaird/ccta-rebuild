@@ -13,4 +13,10 @@
 # scaffolding wrangler creates while building or running it.
 /worker/node_modules/
 /worker/.wrangler/
+
+# Wrangler's own convention for secrets used while running the worker locally.
+# Nothing has ever been written here, and this repository is public, so the
+# rule exists before the file does rather than after.
+/worker/.dev.vars
+/worker/.dev.vars.*
 /tools/__pycache__/

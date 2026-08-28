@@ -132,6 +132,21 @@ jobs:
           fi
           echo "Preview build: all ${total} pages carry noindex, robots.txt disallows crawling."
 
+      - name: Fail if any reader-facing page would fetch from another party
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          # A picture, font, stylesheet or script served from somewhere else is
+          # requested by the reader's browser as the page opens, handing their
+          # network address and the page they are reading to an operator the
+          # Association has no agreement with. The editing tool offers no
+          # setting that refuses such an address, so the refusal happens here.
+          # Links are not resources and are not in scope.
+          host="$(printf '%s' "$BASE_URL" | sed -E 's#^https?://##; s#[:/].*$##')"
+          python3 tools/check-external-resources.py public \
+            "$host" cctownship.org www.cctownship.org
+
       - name: Package the site for publishing
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

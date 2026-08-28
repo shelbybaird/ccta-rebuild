@@ -47,6 +47,17 @@ public_folder: /uploads
 # photograph later does not reclaim its space. Uploads are therefore capped at
 # the point of upload rather than by asking anybody to remember.
 media_libraries:
+  # The asset browser otherwise offers four galleries of somebody else's
+  # photographs, and choosing one stores its web address rather than a copy.
+  # The picture is then fetched from that service by every reader who opens the
+  # page, which tells that service who is reading the Association's notices —
+  # the same disclosure the calendar embed was removed to stop. It also leaves
+  # the page depending on a picture the Association does not hold, and a
+  # description that stops being true if the picture changes.
+  #
+  # An address can still be typed by hand: the editor offers no setting that
+  # removes that. Only a check at build time can refuse one.
+  stock_assets: false
   all:
     max_file_size: 1048576      # one megabyte
     slugify_filename: true      # a filename with spaces makes a fragile address

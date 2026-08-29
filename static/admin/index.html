@@ -6,6 +6,97 @@
     <!-- The editor is not a page of the website and must never be indexed. -->
     <meta name="robots" content="noindex" />
     <title>Clermont County Township Association — editing</title>
+    <script>
+      /*
+        Sign an idle editor out.
+
+        The editor keeps its GitHub token in this browser's local storage, and
+        that token does not expire: it is issued by a GitHub OAuth application,
+        which is a kind that GitHub never expires on its own. Local storage
+        survives closing the tab, closing the browser and restarting the
+        device, and the editor implements no timeout of its own. Left alone,
+        an officer who signs in once on a telephone is signed in on that
+        telephone until they sign out by hand. A mislaid unlocked telephone is
+        then write access to the site.
+
+        Nothing upstream fixes this, so this page does. It is a local sign-out
+        and not a revocation: it removes the token from this device, and the
+        token stays valid at GitHub until it is revoked there.
+
+        Why a stored timestamp rather than a timer. A timer only runs while
+        the page is open, and the case that matters most is the opposite one —
+        a tab closed on a telephone and reopened hours later, with no script
+        of ours running in between. So the last moment of activity is written
+        down, and the comparison is made again on every load, before the
+        editor has read anything.
+
+        Drafts are not touched. The editor backs entry drafts up in IndexedDB,
+        under a separate database, and offers them back on return. This clears
+        one key in local storage, so an interrupted edit costs a sign-in
+        rather than the work — as long as "Automatically back up entry drafts"
+        is left on in the editor's own settings, which is its default.
+      */
+      (() => {
+        // The only number here meant to be changed.
+        //
+        // ⚠ SET SHORT FOR TESTING TONIGHT. The intended value is 15. A value
+        // left too low is merely irritating, so the mistake falls the safe way.
+        const IDLE_LIMIT_MINUTES = 2;
+
+        const SESSION_KEY = 'sveltia-cms.user';        // holds the GitHub token
+        const ACTIVITY_KEY = 'ccta.admin.last-activity';
+        const LIMIT = IDLE_LIMIT_MINUTES * 60 * 1000;
+        const CHECK_EVERY = 30 * 1000;
+        const WRITE_NO_MORE_THAN_EVERY = 60 * 1000;
+
+        // Storage throws rather than returns in some private-browsing modes.
+        // Every failure here leaves the editor working and the timeout off,
+        // because a broken timeout must not become a broken editor.
+        const read = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+        const write = (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
+        const drop = (k) => { try { localStorage.removeItem(k); } catch { /* ignore */ } };
+
+        let lastWritten = 0;
+
+        const stamp = () => {
+          const now = Date.now();
+          if (now - lastWritten < WRITE_NO_MORE_THAN_EVERY) return;
+          lastWritten = now;
+          write(ACTIVITY_KEY, String(now));
+        };
+
+        // No recorded activity means nothing to expire — a first visit, or a
+        // browser that has just been cleared.
+        const idleFor = () => {
+          const at = Number(read(ACTIVITY_KEY));
+          return Number.isFinite(at) && at > 0 ? Date.now() - at : 0;
+        };
+
+        const signOut = () => {
+          drop(SESSION_KEY);
+          lastWritten = Date.now();
+          write(ACTIVITY_KEY, String(lastWritten));
+        };
+
+        // On load, before the editor reads anything.
+        if (idleFor() > LIMIT) signOut(); else stamp();
+
+        // While the page is open.
+        for (const type of ['pointerdown', 'keydown', 'wheel', 'touchstart']) {
+          addEventListener(type, stamp, { capture: true, passive: true });
+        }
+
+        setInterval(() => {
+          if (idleFor() > LIMIT) { signOut(); location.reload(); }
+        }, CHECK_EVERY);
+
+        // Returning to a backgrounded tab, where timers may have been held.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState !== 'visible') return;
+          if (idleFor() > LIMIT) { signOut(); location.reload(); } else stamp();
+        });
+      })();
+    </script>
   </head>
   <body>
     <!--

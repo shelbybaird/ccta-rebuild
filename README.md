@@ -13,4 +13,9 @@ while the work is under way.
 ## How it works
 
 The site is built with Hugo from Markdown files in `content/`, and published as
-static files. Nothing in this repository runs on a server.
+static files. No page a visitor opens runs anything on a server.
+
+`worker/` is the exception, and it is not part of the site. It is a small
+service doing two things a set of static files cannot do for itself: it lets an
+officer sign in to the editor, and it asks for a rebuild when a notice is due
+to start or to stop showing. `worker/README.md` explains why each is necessary.

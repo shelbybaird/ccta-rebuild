@@ -16,12 +16,22 @@
         survives closing the tab, closing the browser and restarting the
         device, and the editor implements no timeout of its own. Left alone,
         an officer who signs in once on a telephone is signed in on that
-        telephone until they sign out by hand. A mislaid unlocked telephone is
-        then write access to the site.
+        telephone until they sign out by hand.
 
-        Nothing upstream fixes this, so this page does. It is a local sign-out
-        and not a revocation: it removes the token from this device, and the
-        token stays valid at GitHub until it is revoked there.
+        Nothing upstream offers a timeout, so this page adds one.
+
+        What it buys, and what it does not — tested on a telephone, 29 August
+        2026. It signs the editor out, and on a machine whose browser is not
+        signed in to GitHub the next person has to log in there before they can
+        reach anything. That is the borrowed laptop and the shared computer,
+        and there the protection is real.
+
+        On a device that IS signed in to GitHub, getting back in is one tap and
+        no password: the authorization already stands, so the sign-in completes
+        without asking anything. So this is a limit on how long the site's key
+        sits on an idle device. It is NOT a lock on somebody's own telephone,
+        and no timeout written in a browser could be — that would take the
+        device's own lock screen, or GitHub's session ending.
 
         Why a stored timestamp rather than a timer. A timer only runs while
         the page is open, and the case that matters most is the opposite one —
@@ -39,9 +49,10 @@
       (() => {
         // The only number here meant to be changed.
         //
-        // ⚠ SET SHORT FOR TESTING TONIGHT. The intended value is 15. A value
-        // left too low is merely irritating, so the mistake falls the safe way.
-        const IDLE_LIMIT_MINUTES = 2;
+        // Not an alarm that rings at this mark. Nothing of ours runs while a
+        // phone has the tab frozen, so the effect is: away longer than this,
+        // and the editor is signed out by the time it is opened again.
+        const IDLE_LIMIT_MINUTES = 15;
 
         const SESSION_KEY = 'sveltia-cms.user';        // holds the GitHub token
         const ACTIVITY_KEY = 'ccta.admin.last-activity';
@@ -90,10 +101,23 @@
           if (idleFor() > LIMIT) { signOut(); location.reload(); }
         }, CHECK_EVERY);
 
-        // Returning to a backgrounded tab, where timers may have been held.
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState !== 'visible') return;
+        const checkNow = () => {
           if (idleFor() > LIMIT) { signOut(); location.reload(); } else stamp();
+        };
+
+        // Coming back to a tab that was put away. Three events, because a
+        // telephone does not reliably give any one of them.
+        //
+        // A phone browser may freeze a backgrounded tab and later restore it
+        // without loading the page again, so the check at the top of this
+        // script never runs a second time and the timer did not tick while it
+        // was away. `pageshow` is what fires on that restore. `visibilitychange`
+        // covers a tab brought forward without having been frozen, and `focus`
+        // covers a window returned to on a desktop.
+        addEventListener('pageshow', checkNow);
+        addEventListener('focus', checkNow);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') checkNow();
         });
       })();
     </script>

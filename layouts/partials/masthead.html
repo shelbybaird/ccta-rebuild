@@ -7,7 +7,15 @@
          this destination has. Removing aria-hidden without also giving the
          image alt text restores a link with no accessible name. */}}
     <a class="masthead__logo" href="{{ site.Home.RelPermalink }}" aria-hidden="true" tabindex="-1"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
-    <a class="masthead__title" href="{{ site.Home.RelPermalink }}">Clermont County Township Association
+    {{/* ⚠ THE NAME IS WRAPPED, NOT WRITTEN BARE, because on a telephone the
+         stylesheet hides it. The Association's name appeared in the masthead
+         and again as the page heading, within 200 pixels of each other and in
+         the same words. Hiding it visually rather than removing it keeps the
+         accessible name on this link — the logo beside it is deliberately
+         out of the reading order, so this text is the only name the link has,
+         and a link with no accessible name is a worse defect than the
+         repetition was. */}}
+    <a class="masthead__title" href="{{ site.Home.RelPermalink }}"><span class="masthead__name">Clermont County Township Association</span>
       {{/* Read from the calendar settings an officer can edit, falling back to
            the site configuration if that file is ever missing a value. */}}
       <span>Meets the {{ default site.Params.meetingDay hugo.Data.calendar.meetingDay }} of the month, {{ default site.Params.meetingTime hugo.Data.calendar.meetingTime }}</span></a>
@@ -15,7 +23,31 @@
 </header>
 <nav class="nav" aria-label="Main">
   <div class="wrap">
-    <ul>
+    {{/* ⭐ A DISCLOSURE, NOT A SCRIPTED MENU.
+
+         `details` and `summary` are the browser's own collapse-and-expand
+         control. The browser announces the state as expanded or collapsed,
+         puts the control in the tab order, and toggles it on Enter and on
+         Space — so it needs no ARIA, and no script. Writing the same thing out
+         of a `div`, a click handler and `aria-expanded` would be more code
+         doing less, and three behaviours to maintain instead of none.
+
+         ⚠ Not because anything forbade a script. `check-external-resources.py`
+         refuses a page that fetches from ANOTHER PARTY; a script served from
+         this site, or written inline, passes it untouched. That no
+         reader-facing page loads any script is true and has been kept on
+         purpose since the townships row was built with CSS alone, but it is a
+         habit rather than a rule and nothing enforces it.
+
+         ⚠ It collapses ON A TELEPHONE ONLY. On a wide screen the summary is
+         hidden and the list is forced open by the stylesheet, so the menu is
+         exactly what it was — no tap, no state, nothing to discover. */}}
+    <details class="nav__disclosure">
+      <summary class="nav__toggle">
+        <span class="nav__toggle-bars" aria-hidden="true"></span>
+        <span>Menu</span>
+      </summary>
+      <ul>
       <li><a href="{{ site.Home.RelPermalink }}"{{ if .IsHome }} aria-current="page"{{ end }}>Home</a></li>
       {{/* Labels come from each section's own title field — change it there and
            the heading and this menu move together.
@@ -61,6 +93,7 @@
              `aria-current` already says. */}}
         <li><a class="nav__temporary" href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ default .Title .Params.menuLabel }}<span class="visually-hidden"> (temporary page)</span></a></li>
       {{ end }}
-    </ul>
+      </ul>
+    </details>
   </div>
 </nav>

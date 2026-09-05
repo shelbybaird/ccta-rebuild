@@ -141,6 +141,16 @@ img { max-width: 100%; height: auto; }
 
 .nav { border-bottom: 3px solid var(--signature); background: var(--surface); }
 .nav ul { display: flex; flex-wrap: wrap; gap: var(--s1); list-style: none; margin: 0; padding: 0; }
+
+/* --- The menu's disclosure ----------------------------------------------- */
+/* On a wide screen there is NO disclosure: the control is hidden and the list
+   is forced open, so the menu is exactly the row it always was. Two rules are
+   needed for that rather than one — a closed `details` is hidden by the
+   browser's own stylesheet, and newer browsers do it with `content-visibility`
+   on `::details-content`, which a `display` on the list does not override. */
+.nav__toggle { display: none; }
+.nav__disclosure::details-content { content-visibility: visible; block-size: auto; }
+.nav__disclosure > ul { display: flex; }
 .nav a {
   display: block; padding: var(--s3) var(--s4);
   /* A menu label is one word, not a paragraph. Without this it inherits the
@@ -450,7 +460,69 @@ article img { max-height: 70vh; width: auto; }
 .foot__map a { color: var(--body); }
 
 @media (max-width: 640px) {
-  .masthead__inner { padding: var(--s3) 0; }
+  /* ⭐ THE MENU COLLAPSES, AND ONLY HERE. Measured on a 375-by-812 telephone
+     before this existed: the banner, the masthead and a four-row menu took 469
+     of 812 pixels — 64% of the first screen before a word of content — and the
+     menu is sticky, so its 193 pixels were 24% of EVERY screen after it.
+
+     The control is a `summary`, so it is a real button to the browser: in the
+     tab order, toggled by Enter or Space, and announced as expanded or
+     collapsed without a line of ARIA. */
+  .nav__toggle {
+    display: flex; align-items: center; gap: var(--s3);
+    padding: var(--s3) var(--s4); margin: 0;
+    font-weight: 700; color: var(--ink); cursor: pointer;
+    list-style: none;                 /* no disclosure triangle; the bars say it */
+  }
+  .nav__toggle::-webkit-details-marker { display: none; }
+  .nav__toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  /* Three bars, drawn rather than fetched, so the menu costs no request. */
+  .nav__toggle-bars { position: relative; display: block; width: 22px; height: 2px; background: var(--ink); }
+  .nav__toggle-bars::before, .nav__toggle-bars::after {
+    content: ""; position: absolute; left: 0; width: 22px; height: 2px; background: var(--ink);
+  }
+  .nav__toggle-bars::before { top: -7px; }
+  .nav__toggle-bars::after  { top: 7px; }
+  /* Open, the bars become a cross — the same element, so nothing is added to
+     the page to say the menu is open. */
+  .nav__disclosure[open] .nav__toggle-bars { background: transparent; }
+  .nav__disclosure[open] .nav__toggle-bars::before { top: 0; transform: rotate(45deg); }
+  .nav__disclosure[open] .nav__toggle-bars::after  { top: 0; transform: rotate(-45deg); }
+
+  /* Closed, the list is hidden — the browser's own behaviour, restored here
+     after the wide-screen rules above turned it off. */
+  .nav__disclosure:not([open])::details-content { content-visibility: hidden; block-size: 0; }
+  .nav__disclosure:not([open]) > ul { display: none; }
+  /* Open, one destination per row: a wrapping row of eight is what this is
+     replacing. */
+  .nav__disclosure[open] > ul { flex-direction: column; padding-bottom: var(--s2); }
+  .nav__disclosure[open] > ul a { border-radius: var(--radius); }
+  /* In a vertical list the temporary page's mark moves from under the label to
+     beside it. Its underline sat directly above the menu's own red rule and the
+     two read as one thick line; a left edge cannot collide with anything. */
+  .nav a.nav__temporary { box-shadow: inset 3px 0 0 var(--signature); }
+  .nav a.nav__temporary[aria-current] { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--signature) 80%, #fff); }
+
+  /* The masthead is the other half of the problem — 167 of those 469 pixels.
+     The logo shrinks and sits beside the name instead of above it. */
+  .masthead__inner { padding: var(--s3) 0; flex-wrap: nowrap; gap: var(--s3); }
+  .masthead__logo img { max-height: 42px; }
+  .masthead__title { font-size: 1rem; }
+  .masthead__title span { font-size: .8rem; }
+  /* The name goes, and only here. It is said again as the page's heading a
+     couple of hundred pixels below, in the same words. Hidden rather than
+     removed, so the link keeps its accessible name — the logo beside it is out
+     of the reading order on purpose and cannot supply one. */
+  .masthead__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* The banner is the largest single piece of furniture left. It is set
+     smaller and tighter here, and its label moves onto the same line as the
+     message rather than reserving a column of its own: the word NOTICE is six
+     characters and was taking the width of a phone's first line for them.
+     ⛔ The label is not dropped. It carries the banner's meaning to a reader
+     who does not see the colour, which is the whole reason it is a word. */
+  .banner__inner { padding: var(--s2) 0; gap: var(--s2); font-size: .9rem; line-height: 1.35; }
+  .banner__label { font-size: .7rem; }
   .rows time, .rows .rows__date { min-width: 100%; }
   /* Seven columns across a telephone leave about forty pixels a day, which is
      room for the date and a mark and nothing else. The label stays in the

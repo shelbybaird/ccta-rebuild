@@ -160,6 +160,21 @@ jobs:
           python3 tools/check-external-resources.py public \
             "$host" cctownship.org www.cctownship.org
 
+      - name: Fail if any reader-facing page runs a script
+        run: |
+          set -euo pipefail
+          # Every page a visitor opens is markup and a stylesheet. Nothing waits
+          # for a script, nothing breaks when one fails to arrive, and nothing
+          # is slower for one parsing while the reader waits. That was true from
+          # the first commit and stayed true because somebody was watching; this
+          # makes it a property of the build instead.
+          #
+          # Separate from the check above on purpose. That one asks whose the
+          # resource is and passes anything served from this site. This one asks
+          # what it is. A script hosted here would clear the other check
+          # untouched, which is the gap this closes.
+          python3 tools/check-no-scripts.py public
+
       - name: Package the site for publishing
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

@@ -1,0 +1,89 @@
+{{ define "main" }}
+{{/*
+  A temporary page: one subject, standing on its own for as long as it is
+  wanted, and then gone.
+
+  ⭐ WHY THIS EXISTS RATHER THAN A LONG ANNOUNCEMENT. An announcement can carry
+  the same words, the same picture and the same files — it was tried, on
+  5 September 2026, with a fundraising dinner. Two things went wrong and neither
+  is fixable inside an announcement. The flyer filled the first screen, so a
+  reader met a poster and had to scroll past all of it to learn anything. And
+  the two calls to action, being ordinary Markdown links in a paragraph, read as
+  sentence links rather than as the things a reader is being asked to do.
+
+  So the difference between the two types is not what they can hold. It is that
+  an announcement is a notice in a list, ordered by date and read in passing,
+  and this is a page somebody is sent to. The layout below follows from that:
+  what is being asked for sits at the top beside the picture, at a size that
+  leaves room for words, and the picture is capped so that it illustrates the
+  page instead of becoming it.
+
+  ⚠ TEMPORARY IS THE DISPLAY WINDOW, not a separate mechanism. `publishDate` and
+  `expiryDate` are the same two fields every announcement has, and Hugo drops a
+  page outside its window from the build entirely — which is why such a page
+  also leaves the menu by itself, with nothing to remember and nothing to undo.
+*/}}
+{{ $cta := .Params.callsToAction }}
+<article class="feature">
+
+  <div class="feature__head">
+    <div class="feature__intro">
+      <h1>{{ .Title }}</h1>
+      {{ with .Params.summary }}<p class="lede">{{ . }}</p>{{ end }}
+
+      {{/* The actions sit here, above the fold and beside the picture, because
+           this page exists to be acted on. A page with none simply has none. */}}
+      {{ with $cta }}
+      <div class="feature__actions">
+        {{ range . }}
+        {{ $external := or (hasPrefix .link "http") (hasPrefix .link "mailto:") }}
+        <a class="button{{ if ne (.emphasis | default "primary") "primary" }} button--quiet{{ end }}"
+           href="{{ if hasPrefix .link "/" }}{{ partial "asset.html" .link }}{{ else }}{{ .link }}{{ end }}"
+           {{ if and $external (not (hasPrefix .link "mailto:")) }}target="_blank" rel="noopener"{{ end }}>{{ .label }}{{ if and $external (not (hasPrefix .link "mailto:")) }}{{ partial "newtab-note.html" . }}{{ end }}</a>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+
+    {{/* The picture is capped rather than given the page's full width. A flyer
+         is portrait and a full-width one is taller than the screen. */}}
+    {{ with .Params.image }}
+      {{ with .src }}
+        {{ if not $.Params.image.alt }}
+          {{ warnf "Temporary page %q carries a picture with no description, so it is published as though it were decorative. File: %s" $.Title $.File.Path }}
+        {{ end }}
+        <figure class="feature__figure"><img src="{{ partial "asset.html" . }}" alt="{{ $.Params.image.alt }}"></figure>
+      {{ end }}
+    {{ end }}
+  </div>
+
+  <div class="feature__body">{{ .Content }}</div>
+
+  {{ with .Params.attachments }}
+  <section class="section">
+    <h2>Files</h2>
+    <ul class="rows">
+      {{ range . }}
+      <li>
+        <a href="{{ partial "asset.html" .file }}" target="_blank" rel="noopener">{{ .title }}{{ partial "newtab-note.html" . }}</a>
+        <span class="tag">{{ path.Ext .file | strings.TrimPrefix "." | upper }}</span>
+      </li>
+      {{ end }}
+    </ul>
+  </section>
+  {{ end }}
+
+  {{/* The actions again at the foot, for a reader who has read to the end and
+       is deciding. The same list, so the two cannot disagree. */}}
+  {{ with $cta }}
+  <div class="feature__actions feature__actions--foot">
+    {{ range . }}
+    {{ $external := or (hasPrefix .link "http") (hasPrefix .link "mailto:") }}
+    <a class="button{{ if ne (.emphasis | default "primary") "primary" }} button--quiet{{ end }}"
+       href="{{ if hasPrefix .link "/" }}{{ partial "asset.html" .link }}{{ else }}{{ .link }}{{ end }}"
+       {{ if and $external (not (hasPrefix .link "mailto:")) }}target="_blank" rel="noopener"{{ end }}>{{ .label }}{{ if and $external (not (hasPrefix .link "mailto:")) }}{{ partial "newtab-note.html" . }}{{ end }}</a>
+    {{ end }}
+  </div>
+  {{ end }}
+</article>
+{{ end }}

@@ -14,6 +14,10 @@
   {{ end }}
   <link rel="icon" href="{{ "images/favicon.png" | relURL }}">
   {{ with .OutputFormats.Get "rss" }}<link rel="alternate" type="application/rss+xml" href="{{ .RelPermalink }}" title="{{ site.Title }}">{{ end }}
+  {{/* The calendar page publishes a subscribable feed as well as itself.
+       Announcing it here is what lets a browser or a calendar application
+       offer to subscribe without the reader hunting for the link. */}}
+  {{ with .OutputFormats.Get "calendar" }}<link rel="alternate" type="text/calendar" href="{{ .RelPermalink }}" title="{{ site.Title }} — meetings and events">{{ end }}
   <meta property="og:title" content="{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }}{{ end }}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ .Permalink }}">

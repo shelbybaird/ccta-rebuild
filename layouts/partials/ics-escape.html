@@ -1,0 +1,21 @@
+{{/*
+  Make one value safe to put in a calendar feed.
+
+  A calendar file gives four characters a meaning of their own: a backslash
+  escapes, a semicolon and a comma separate values, and a line break ends a
+  property. A venue written "Hall, Room 2" or a note containing a semicolon
+  would otherwise end the value early and leave the rest of it read as
+  something else — which is how a feed stops parsing halfway down and a
+  reader's calendar quietly shows half the year.
+
+  The backslash is replaced FIRST. Doing it later would go back over the
+  backslashes just added and double them.
+*/}}
+{{ $s := printf "%v" . }}
+{{ $s = replace $s "\\" "\\\\" }}
+{{ $s = replace $s ";" "\\;" }}
+{{ $s = replace $s "," "\\," }}
+{{ $s = replace $s "\r\n" "\\n" }}
+{{ $s = replace $s "\n" "\\n" }}
+{{ $s = replace $s "\r" "\\n" }}
+{{ return $s }}

@@ -31,9 +31,11 @@ under the MIT license, vendored here unmodified at upstream commit `25f56e1`
 (2026-08-21). `LICENSE.txt` is upstream's and stays with it.
 
 It is copied in rather than depended on because the same worker is expected to
-grow a second, unrelated job later: waking the site's build when a notice is due
-to start or stop showing. Keeping the source here means that change is an
-ordinary edit in this repository rather than a fork of somebody else's.
+grow a second, unrelated job later: waking the site's build at the moment the
+site next goes stale — a notice due to start or stop showing, or a meeting or
+event passing out of the calendar's list of what is coming up. Keeping the
+source here means that change is an ordinary edit in this repository rather
+than a fork of somebody else's.
 
 ## What is configured where
 

@@ -1,0 +1,17 @@
+{{ define "main" }}
+{{/* Not in the menu. Events are read on the calendar, beside the meetings;
+     this page exists because every event page is built underneath it and a
+     reader who removes the last part of an address should find something
+     rather than a missing page. */}}
+<h1>{{ .Title }}</h1>
+<p class="lede">Special events are shown on the <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a> alongside the Association's meetings.</p>
+<ul class="rows">
+  {{ range .Pages.ByDate.Reverse }}
+  <li>
+    <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Mon 2 Jan 2006" }}</time>
+    <span><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
+    {{ if ne (.Params.status | default "scheduled") "scheduled" }}<span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}

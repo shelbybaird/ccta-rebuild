@@ -8,7 +8,9 @@
          image alt text restores a link with no accessible name. */}}
     <a class="masthead__logo" href="{{ site.Home.RelPermalink }}" aria-hidden="true" tabindex="-1"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
     <a class="masthead__title" href="{{ site.Home.RelPermalink }}">Clermont County Township Association
-      <span>Meets the {{ site.Params.meetingDay }} of the month, {{ site.Params.meetingTime }}</span></a>
+      {{/* Read from the calendar settings an officer can edit, falling back to
+           the site configuration if that file is ever missing a value. */}}
+      <span>Meets the {{ default site.Params.meetingDay hugo.Data.calendar.meetingDay }} of the month, {{ default site.Params.meetingTime hugo.Data.calendar.meetingTime }}</span></a>
   </div>
 </header>
 <nav class="nav" aria-label="Main">
@@ -16,7 +18,18 @@
     <ul>
       <li><a href="{{ site.Home.RelPermalink }}"{{ if .IsHome }} aria-current="page"{{ end }}>Home</a></li>
       {{/* Labels come from each section's own title field — change it there and
-           the heading and this menu move together. */}}
+           the heading and this menu move together.
+
+           ⭐ THE ORDER IS THE `weight` IN EACH SECTION'S `_index.md`, and this
+           menu and the footer's list of sections both read it, so the two can
+           never disagree. Set in tens — 10, 20, 30 — so a section can be put
+           between two others by giving it the number in between, without
+           renumbering anything. Weight 0 keeps a section out of both lists,
+           which is how the officers, the special events and the temporary
+           pages stay out.
+
+           Reordered 5 September 2026 to: news, calendar, meetings, minutes,
+           constitution, townships, about. */}}
       {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
         {{/* A page is NOT a descendant of itself, so testing descent alone
              marked a section's children and missed the section's own page —
@@ -34,6 +47,20 @@
              same destination under two different names. */}}
         <li><a href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ default .Title .Params.menuLabel }}</a></li>
       {{ end }}{{ end }}
+      {{/* A temporary page that asked to be in the menu, for as long as it is
+           live. Nothing has to be removed when it ends: a page outside its
+           display window is not built at all, so it leaves this list by
+           itself. It is placed last so that the standing pages never move
+           under a reader while one is running. */}}
+      {{ range where (where site.RegularPages "Section" "temporary") "Params.menuWhileLive" true }}
+        {{ $here := "" }}
+        {{ if eq $ . }}{{ $here = "page" }}{{ end }}
+        {{/* The red band is decoration and carries nothing to a reader who
+             cannot see it, so the same fact is put in the link's name. It says
+             what kind of page this is — not where the reader is, which
+             `aria-current` already says. */}}
+        <li><a class="nav__temporary" href="{{ .RelPermalink }}"{{ with $here }} aria-current="{{ . }}"{{ end }}>{{ default .Title .Params.menuLabel }}<span class="visually-hidden"> (temporary page)</span></a></li>
+      {{ end }}
     </ul>
   </div>
 </nav>

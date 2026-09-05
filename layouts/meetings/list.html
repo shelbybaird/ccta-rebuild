@@ -1,6 +1,10 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
-<p class="lede">The Association meets the {{ site.Params.meetingDay }} of the month at {{ site.Params.meetingTime }}. A cancelled meeting stays listed and marked.</p>
+<p class="lede">The Association meets the {{ default site.Params.meetingDay hugo.Data.calendar.meetingDay }} of the month at {{ default site.Params.meetingTime hugo.Data.calendar.meetingTime }}. A cancelled meeting stays listed and marked.</p>
+{{/* This page is the schedule of meetings and shows the venue by name. Where
+     each venue IS, together with any special event, is on the calendar — which
+     is also the page that can be subscribed to. */}}
+<p>The <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a> carries the full details of what is coming up, including the address of each venue, and can be subscribed to.</p>
 <ul class="rows">
   {{ range .Pages.ByDate }}
   <li>

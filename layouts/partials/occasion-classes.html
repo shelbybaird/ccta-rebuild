@@ -1,0 +1,19 @@
+{{/*
+  The card classes for one occasion, so the home page and the calendar cannot
+  give the same meeting a different card.
+
+  They did, until 5 September 2026. The calendar had a card of its own, written
+  fresh rather than built on the one the rest of the site already used, and the
+  two drifted in four ways: the left edge's colour, the corners, the background
+  and the padding. A special event carried the logo's red on the calendar and
+  plain navy on the home page — the same event, two edges, on one site.
+
+  Both now wear `.note`, the site's one card, and the modifier below says what
+  the left edge means. Nothing that renders a card decides its own colour.
+
+  Takes one entry from `occasions.html`.
+*/}}
+{{- $c := slice "note" -}}
+{{- if eq .kind "event" }}{{ $c = $c | append "note--event" }}{{ end -}}
+{{- if ne .status "scheduled" }}{{ $c = $c | append (printf "note--%s" .status) }}{{ end -}}
+{{- return (delimit $c " ") -}}

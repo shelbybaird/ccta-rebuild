@@ -65,6 +65,12 @@
   --measure: 68ch;
   --page: 68rem;
 
+  /* The size of a section heading, held here because one thing that is not a
+     heading is set to match it: the link to the member townships under the
+     site's name on the home page. Changing `h2` alone would have left the two
+     to drift. */
+  --size-h2: clamp(1.3rem, 1.05rem + 1vw, 1.6rem);
+
   --s1: .25rem; --s2: .5rem; --s3: .75rem; --s4: 1rem;
   --s5: 1.5rem; --s6: 2rem;  --s7: 3rem;   --s8: 4rem;
 
@@ -84,7 +90,7 @@ body {
 }
 h1, h2, h3 { color: var(--ink-strong); line-height: 1.2; margin: 0 0 var(--s3); font-weight: 700; }
 h1 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem); letter-spacing: -.02em; }
-h2 { font-size: clamp(1.3rem, 1.05rem + 1vw, 1.6rem); }
+h2 { font-size: var(--size-h2); }
 h3 { font-size: 1.125rem; }
 p  { margin: 0 0 var(--s4); max-width: var(--measure); }
 a  { color: var(--link); text-underline-offset: .15em; }
@@ -145,6 +151,23 @@ img { max-width: 100%; height: auto; }
 }
 .nav a:hover { background: var(--surface-sunk); text-decoration: underline; }
 .nav a[aria-current] { background: var(--ink); color: #fff; }
+/* A temporary page in the menu is marked, so that a standing page and a thing
+   that will be gone next month do not look like the same kind of destination.
+   The underline is the logo's red, the site's one accent, and it is a graphical
+   element rather than text, so 3.66:1 against white is enough for it.
+
+   ⭐ The mark STAYS when the reader is on that page. It is not a "you are here"
+   indicator — the navy fill is that — it is what kind of page this is, and that
+   does not stop being true when somebody opens it.
+
+   It changes ground rather than disappearing. Measured against the two: the
+   logo's red is 3.66:1 on the menu's white and only 2.92:1 on the navy the
+   current tab is filled with, which misses the 3:1 a graphical element needs.
+   So the current tab lightens the same red until it clears — 80% of it against
+   white is 3.68:1 on navy. One hue, adjusted for what it is drawn on, which is
+   what the alert banner's colours do as well. */
+.nav a.nav__temporary { box-shadow: inset 0 -3px 0 var(--signature); }
+.nav a.nav__temporary[aria-current] { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--signature) 80%, #fff); }
 
 /* The menu stays put while a long page scrolls under it. Ninety entries into
    the minutes, a reader can still leave for another section without scrolling
@@ -171,6 +194,18 @@ img { max-width: 100%; height: auto; }
 @media (max-height: 32rem) {
   .nav { position: static; }
 }
+
+/* --- The members, named once under the site's name ----------------------- */
+/* Set as a quiet line rather than a heading. It is a signpost to a page that
+   does not change, sitting above the two things on this page that do, and it
+   should not compete with either. */
+/* Set at a section heading's size, because it sits among section headings and
+   anything smaller read as a caption on the title above it. It stays a link
+   rather than becoming a heading: an `h2` here would put an entry in the
+   document's outline with no section beneath it, which is what a screen reader
+   navigating by heading would follow and find nothing. */
+.home__members { margin: calc(var(--s3) * -1) 0 var(--s6); font-size: var(--size-h2); }
+.home__members a { font-weight: 600; }
 
 /* --- Layout ------------------------------------------------------------- */
 main { padding: var(--s7) 0 var(--s8); }
@@ -213,9 +248,19 @@ main { padding: var(--s7) 0 var(--s8); }
 }
 
 /* --- Announcements ------------------------------------------------------ */
-.posts { list-style: none; margin: 0; padding: 0; }
-.posts li { padding: var(--s5) 0; border-bottom: 1px solid var(--rule); }
-.posts li:first-child { padding-top: 0; }
+/* A picture on an announcement is given a ceiling as well as a width. The field
+   is meant for a photograph, which is usually landscape and fits the measure
+   comfortably; a portrait one — a flyer, a scanned notice — is taller than the
+   screen at full width, and pushed every word of a real announcement below the
+   fold when that was tried on 5 September 2026. The height only ever binds on a
+   tall picture, so a photograph is untouched. */
+article img { max-height: 70vh; width: auto; }
+
+/* Each announcement is a card, wearing `.note` — the same panel the coming-up
+   block uses, so the two sections of the home page read as one thing rather
+   than as a list under a box. This rule therefore sets only the spacing
+   between them; the panel itself is defined once, under Notices. */
+.posts { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
 .post__date { display: block; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--s1); }
 .post__title { font-size: 1.25rem; margin: 0 0 var(--s2); }
 .post__title a { text-decoration: none; color: var(--ink-strong); }
@@ -252,8 +297,142 @@ main { padding: var(--s7) 0 var(--s8); }
 .officer dt { font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-top: var(--s2); }
 .officer dd { margin: 0; }
 
+/* --- Coming up, on the home page ---------------------------------------- */
+/* Two cards where there are two, side by side, so the second costs no height
+   and the announcements below stay where a reader last found them. Below the
+   breakpoint they stack, because a telephone never had the second column. */
+.coming { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+.coming__card p:last-child { margin-bottom: 0; }
+.coming__more { margin-top: var(--s3); font-size: .9rem; color: var(--muted); }
+
+/* --- Calendar ----------------------------------------------------------- */
+/* Two views of one list. The cards carry everything a reader needs in order to
+   turn up — when, where, and the street address the schedule page does not
+   show. The month grids below them answer the other question, which is what
+   the shape of the season looks like, and they carry no detail of their own:
+   every entry in a grid points back up at the card that has it.
+
+   Nothing here is a colour of its own. A meeting and a special event are told
+   apart by the ink and the logo's red, the two colours the site already has,
+   and a cancelled one borrows the banner's cancelled red so the same news
+   looks the same wherever it appears. */
+
+.button {
+  display: inline-block; background: var(--ink); color: #fff;
+  padding: var(--s2) var(--s4); border-radius: var(--radius);
+  text-decoration: none; font-weight: 600;
+}
+.button:visited { color: #fff; }
+.button:hover { background: var(--ink-strong); text-decoration: underline; }
+/* The second action on a page, and any after it. Same size and same target, so
+   it is as easy to press; only the weight of the colour says which one the page
+   is really asking for. */
+.button--quiet { background: transparent; color: var(--link); border: 2px solid var(--ink); padding: calc(var(--s2) - 2px) calc(var(--s4) - 2px); }
+.button--quiet:visited { color: var(--link-visited); }
+.button--quiet:hover { background: var(--surface-sunk); color: var(--ink-strong); }
+
+.cal__subscribe { background: var(--surface-lift); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s4); margin-bottom: var(--s6); }
+.cal__subscribe p { margin: 0; max-width: none; display: flex; flex-wrap: wrap; gap: var(--s3) var(--s4); align-items: center; }
+.cal__subscribe-note { color: var(--muted); font-size: .9rem; flex: 1 1 22rem; }
+.cal__elsewhere { margin-top: var(--s7); color: var(--muted); }
+
+/* --- One occasion, in full ---------------------------------------------- */
+.occasions { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
+/* A calendar card IS the site's card, `.note`, and carries nothing of its own
+   but the space its longer contents need. It had a panel of its own until
+   5 September 2026 and the two drifted in four ways — edge colour, corners,
+   background and padding — so the same special event showed a red edge here
+   and a navy one on the home page. `occasion-classes.html` now decides for
+   both. */
+.occasion { padding-inline: var(--s5); }
+.occasion__kind { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 var(--s1); }
+.occasion__title { font-size: 1.2rem; margin: 0 0 var(--s2); display: flex; flex-wrap: wrap; gap: var(--s2); align-items: baseline; }
+.occasion__when { margin: 0 0 var(--s1); font-weight: 600; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+.occasion__until { font-weight: 400; color: var(--muted); }
+.occasion__where { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s3); align-items: baseline; }
+.occasion__venue { font-weight: 600; }
+/* The address is set quieter than the venue and never smaller than the body
+   text it sits beside. It is the answer to "where is that", not a footnote. */
+.occasion__address { color: var(--muted); }
+.occasion__note { margin: var(--s2) 0 0; color: var(--muted); font-style: italic; }
+.occasion__body { margin-top: var(--s3); }
+.occasion__body p:last-child { margin-bottom: 0; }
+/* An entry arrived at by following a link from a month grid is highlighted for
+   a moment, so that the jump lands somewhere visible rather than dropping the
+   reader into an undifferentiated column of cards. */
+.occasion:target { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* --- The month grids ----------------------------------------------------- */
+.cal__months { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.month { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); table-layout: fixed; }
+.month__name { caption-side: top; text-align: left; font-weight: 700; color: var(--ink-strong); padding: var(--s3) var(--s3) var(--s2); font-size: 1.05rem; }
+.month th { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: var(--s1) 0; border-bottom: 1px solid var(--rule); }
+/* The column headings are written out in full so that a screen reader says
+   "Thursday", and shortened on screen because seven full weekday names will not
+   fit across a telephone. The two spellings are the same word. */
+.month__dayname { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.month td { vertical-align: top; height: 3.1rem; padding: var(--s1); border: 1px solid var(--rule); font-size: .8rem; }
+.month__pad { background: var(--surface-sunk); }
+.month__num { display: block; font-variant-numeric: tabular-nums; color: var(--muted); }
+.month__day--has { background: color-mix(in srgb, var(--ink) 6%, #fff); }
+.month__day--has .month__num { color: var(--ink-strong); font-weight: 700; }
+/* Today is marked by a ring rather than by a fill, so it cannot be mistaken for
+   a day that has something on it. */
+.month__day--today { box-shadow: inset 0 0 0 2px var(--accent); }
+.month__entry { display: block; line-height: 1.25; margin-top: 2px; }
+.month__entry a { color: var(--link); text-decoration: none; }
+.month__entry a:hover { text-decoration: underline; }
+.month__dot { display: inline-block; width: .5rem; height: .5rem; border-radius: 999px; background: var(--ink); margin-right: 3px; vertical-align: baseline; }
+.month__entry--event .month__dot { background: var(--signature); }
+.month__entry--cancelled .month__dot { background: var(--banner-cancel-bg); }
+.month__entry--moved .month__dot { background: var(--banner-important-bg); }
+.month__label { font-size: .7rem; }
+/* A cancelled entry is struck through as well as recoloured, because colour
+   alone is not a signal a reader who cannot see it receives. */
+.month__entry--cancelled .month__label { text-decoration: line-through; }
+
+/* --- A temporary page ---------------------------------------------------- */
+/* One subject on its own page, for as long as it is wanted. The picture sits
+   BESIDE the words rather than above them, and is capped, because a flyer is
+   portrait: given the page's width it is taller than the screen, and a reader
+   meets a poster instead of a page. That is what happened when the same
+   content was tried as an announcement on 5 September 2026. */
+.feature__head { display: grid; gap: var(--s5); align-items: start; margin-bottom: var(--s6); }
+@media (min-width: 760px) {
+  /* The words first and the picture second in the markup, so a screen reader
+     and a telephone both meet the page before the poster; on a wide screen the
+     picture moves to the right of them. */
+  .feature__head { grid-template-columns: minmax(0, 1fr) minmax(200px, 22rem); }
+}
+.feature__figure { margin: 0; }
+.feature__figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); }
+.feature__intro h1 { margin-bottom: var(--s3); }
+.feature__actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s5); }
+.feature__actions--foot { margin-top: var(--s7); padding-top: var(--s5); border-top: 1px solid var(--rule); }
+.feature__body h2 { margin-top: var(--s6); }
+
 /* --- Notices ------------------------------------------------------------ */
+/* ⭐ THE SITE'S ONE CARD. A notice, an announcement, a meeting, a special
+   event, the constitution's standing note: all of them are this. The square
+   left corner is deliberate — it lets the 4px bar read as attached to the panel
+   rather than floating inside a rounded box.
+
+   THE BAR'S COLOUR IS ITS MEANING, and nothing that renders a card chooses it.
+   The content stores a NAME — a kind, or a status of scheduled, cancelled or
+   moved — and these four lines decide what each name looks like, which is the
+   same arrangement the alert banner uses. So changing what "cancelled" looks
+   like changes it on every card that has ever carried it, site-wide, here. */
 .note { background: var(--surface-lift); border: 1px solid var(--rule); border-left: 4px solid var(--accent); box-shadow: var(--shadow); padding: var(--s4); border-radius: 0 var(--radius) var(--radius) 0; }
+/* The one place the logo's red does any work besides the rule under the menu:
+   a special event is the exception among the Association's monthly meetings,
+   which is exactly what an accent is for. */
+.note--event { border-left-color: var(--signature); }
+/* ⚠ Order matters here, and it is the order it should be. A card can carry
+   both a kind and a status — a special event that has been moved — and these
+   two come after the kind above, so the status wins. What has happened to a
+   thing is more urgent than what kind of thing it is. */
+.note--cancelled { border-left-color: var(--banner-cancel-bg); }
+.note--moved { border-left-color: var(--banner-important-bg); }
 .note p:last-child { margin-bottom: 0; }
 .empty { color: var(--muted); font-style: italic; }
 
@@ -267,32 +446,18 @@ main { padding: var(--s7) 0 var(--s8); }
 @media (max-width: 640px) {
   .masthead__inner { padding: var(--s3) 0; }
   .rows time, .rows .rows__date { min-width: 100%; }
+  /* Seven columns across a telephone leave about forty pixels a day, which is
+     room for the date and a mark and nothing else. The label stays in the
+     markup and is still read aloud; the details are in the cards above. */
+  .month__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .month td { height: 2.6rem; }
+  .cal__months { grid-template-columns: 1fr; }
+  /* With the label hidden, the link is a dot half a finger wide. The anchor is
+     given a target of its own instead, so what is tapped is the space under
+     the date rather than the mark drawn in it. */
+  .month__entry a { display: block; min-height: 24px; min-width: 24px; padding-top: 2px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
-
-/* --- Horizontal rail: one scrolling row, no JavaScript ------------------- */
-/* Used for the member townships on the home page. Every member appears, in
-   one row, and the row scrolls. Nothing is omitted and nothing is promoted. */
-.rail {
-  display: flex; gap: var(--s4); list-style: none; margin: 0;
-  padding: 0 0 var(--s3);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--rule) var(--surface-sunk);
-}
-.rail > li { flex: 0 0 230px; scroll-snap-align: start; }
-/* Deliberately plain block layout inside the tile. An earlier attempt made the
-   card a flex column, which let the image box — sized by aspect-ratio — be
-   squeezed to half the tile width. Nothing here needs flex.
-   The heading keeps its full size; the row abbreviates "Township" to "Twp"
-   in the template instead, and the townships page shows names in full. */
-.rail::-webkit-scrollbar { height: 10px; }
-.rail::-webkit-scrollbar-track { background: var(--surface-sunk); border-radius: 999px; }
-.rail::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 999px; }
-.rail::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-.rail__hint { font-size: .85rem; color: var(--muted); margin: 0 0 var(--s2); }
 
 /* --- Links that leave this page ----------------------------------------- */
 /* Available to a screen reader, invisible on screen — a sighted reader gets

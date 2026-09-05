@@ -1,0 +1,17 @@
+{{ define "main" }}
+<p class="occasion__kind"><a href="{{ (site.GetPage "/calendar").RelPermalink }}">Calendar</a> — special event</p>
+<h1>{{ .Title }}{{ if ne (.Params.status | default "scheduled") "scheduled" }} <span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}</h1>
+<p class="occasion__when">
+  <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Monday 2 January 2006" }}, {{ .Date.Format "3:04 pm" }}</time>
+  {{ with .Params.end }}<span class="occasion__until">until {{ (partial "as-time.html" .).Format "3:04 pm" }}</span>{{ end }}
+</p>
+{{ with .Params.location }}
+<p class="occasion__where">
+  <span class="occasion__venue">{{ . }}</span>
+  {{ with $.Params.address }}<span class="occasion__address">{{ . }}</span>{{ end }}
+</p>
+{{ end }}
+{{ with .Params.note }}<p class="occasion__note">{{ . }}</p>{{ end }}
+{{ .Content }}
+<p class="cal__elsewhere">Everything else the Association has scheduled is on the <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a>.</p>
+{{ end }}

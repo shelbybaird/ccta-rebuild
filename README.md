@@ -17,5 +17,12 @@ static files. No page a visitor opens runs anything on a server.
 
 `worker/` is the exception, and it is not part of the site. It is a small
 service doing two things a set of static files cannot do for itself: it lets an
-officer sign in to the editor, and it asks for a rebuild when a notice is due
-to start or to stop showing. `worker/README.md` explains why each is necessary.
+officer sign in to the editor, and it asks for a rebuild at the moments a page
+would otherwise go stale — a notice due to start or stop showing, and a meeting
+or event passing out of the calendar's list of what is coming up.
+`worker/README.md` explains why each is necessary.
+
+The calendar publishes twice from one set of content: as a page, and as
+`calendar.ics`, which a calendar application can subscribe to. Both are built
+from the meetings and the special events by `layouts/partials/occasions.html`,
+which is the only place that knows about both types.

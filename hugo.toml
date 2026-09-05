@@ -22,7 +22,28 @@ enableRobotsTXT = true
 [markup.goldmark.renderer]
   unsafe = false           # Presentation must not leak into content. No raw HTML in a post body.
 
+# The calendar publishes twice from one set of content: as a page a reader
+# looks at, and as a feed a calendar application subscribes to. Declaring the
+# media type as well as the format is what makes Hugo serve the feed as a
+# calendar rather than as a file to download.
+[mediaTypes."text/calendar"]
+  suffixes = ["ics"]
+
+[outputFormats.calendar]
+  mediaType    = "text/calendar"
+  baseName     = "calendar"     # published at /calendar/calendar.ics
+  isPlainText  = true           # no HTML escaping: an ampersand in a venue name must survive
+  notAlternative = false        # so the page can advertise the feed in its own head
+
 [params]
+  # Fall-backs for the four calendar settings an officer edits from the editing
+  # screens, which are stored in `data/calendar.yml`. That file carries values
+  # and nothing else: the editor rewrites it whole on every save, so a comment
+  # written there would be deleted the first time somebody changed the meeting
+  # time. The reasoning therefore lives here, where nothing but a person writes.
+  #
+  # Each template reads the data file and falls back to the value below, so a
+  # setting deleted by mistake leaves the page correct rather than blank.
   meetingDay      = "third Thursday"
   meetingTime     = "6:30 pm"
   contactEmail    = "info@cctownship.org"   # role address; the free mail account is retired

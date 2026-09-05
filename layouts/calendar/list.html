@@ -1,0 +1,74 @@
+{{ define "main" }}
+{{ $cal      := hugo.Data.calendar }}
+{{ $showAddr := ne (printf "%v" $cal.showAddresses) "false" }}
+{{ $months   := int (default 6 $cal.monthsShown) }}
+
+{{/* Everything the Association has scheduled, meetings and events in one list.
+     Gathered once here and handed to both halves of the page below. */}}
+{{ $all := partial "occasions.html" . }}
+
+{{/* "Now" is the moment this build ran, not the moment the page is read. The
+     site has no timer — a build happens when content changes or when somebody
+     asks for one — so a meeting drops out of "what is coming up" at the next
+     build after it happens rather than at midnight. `tools/next-boundary.py`
+     is what keeps that gap short. */}}
+{{ $now      := now }}
+{{ $upcoming := where $all "start" "ge" $now }}
+{{ $past     := where $all "start" "lt" $now }}
+
+<h1>{{ .Title }}</h1>
+<p class="lede">{{ $cal.lede }}</p>
+
+<div class="cal__subscribe">
+  {{ with .OutputFormats.Get "calendar" }}
+  <p>
+    <a class="button" href="{{ .RelPermalink }}">Subscribe to this calendar</a>
+    <span class="cal__subscribe-note">Opens in the calendar application on your computer or telephone, and keeps itself up to date. The address can also be copied and pasted into any calendar that accepts a subscription.</span>
+  </p>
+  {{ end }}
+</div>
+
+{{/* --- What is coming up ------------------------------------------------ */}}
+<section class="section" aria-labelledby="upcoming">
+  <div class="section__head"><h2 id="upcoming">What is coming up</h2></div>
+  {{ if $upcoming }}
+    <ul class="occasions">
+      {{ range $upcoming }}
+        {{ partial "occasion-card.html" (dict "o" . "showAddr" $showAddr) }}
+      {{ end }}
+    </ul>
+  {{ else }}
+    <p>Nothing is scheduled at the moment. The Association meets the {{ default site.Params.meetingDay $cal.meetingDay }} of the month at {{ default site.Params.meetingTime $cal.meetingTime }}, and dates appear here as they are set.</p>
+  {{ end }}
+</section>
+
+{{/* --- The months ------------------------------------------------------- */}}
+<section class="section" aria-labelledby="months">
+  <div class="section__head"><h2 id="months">The months ahead</h2></div>
+  <div class="cal__months">
+    {{ $first := time.AsTime (printf "%04d-%02d-01" $now.Year (int $now.Month)) "America/New_York" }}
+    {{ range seq $months }}
+      {{ $monthStart := $first.AddDate 0 (sub . 1) 0 }}
+      {{ partial "month-grid.html" (dict "monthStart" $monthStart "occasions" $all "showAddr" $showAddr) }}
+    {{ end }}
+  </div>
+</section>
+
+{{/* --- What has already happened ---------------------------------------- */}}
+{{ with $past }}
+<section class="section" aria-labelledby="past">
+  <div class="section__head"><h2 id="past">Earlier this year</h2></div>
+  <ul class="rows">
+    {{ range (sort . "start" "desc") }}
+    <li>
+      <time datetime="{{ .start.Format "2006-01-02T15:04:05Z07:00" }}">{{ .start.Format "Mon 2 Jan 2006" }}</time>
+      <span>{{ .title }}{{ with .location }} — {{ . }}{{ end }}</span>
+      {{ if ne .status "scheduled" }}<span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}
+    </li>
+    {{ end }}
+  </ul>
+</section>
+{{ end }}
+
+<p class="cal__elsewhere">The full schedule of meetings, including those already held, is on the <a href="{{ (site.GetPage "/meetings").RelPermalink }}">meetings page</a>. Minutes are posted on the <a href="{{ (site.GetPage "/minutes").RelPermalink }}">minutes page</a> once they are approved.</p>
+{{ end }}

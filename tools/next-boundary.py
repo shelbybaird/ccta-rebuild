@@ -33,9 +33,23 @@ from zoneinfo import ZoneInfo
 
 SITE_ZONE = ZoneInfo("America/New_York")
 
-# Only these two dates move content in or out of the site. `date` is what a
-# reader sees and what orders a list; it publishes nothing on its own.
+# These two dates move content in or out of the site, on any page.
 BOUNDARY_KEYS = ("publishDate", "expiryDate")
+
+# ⭐ AND `date`, on a meeting or a special event alone, since the calendar was
+# built. It was true until then that `date` was what a reader sees and what
+# orders a list, and that it published nothing on its own. The calendar page
+# divides what is coming up from what has already happened, and it divides on
+# that field — so the moment a meeting begins, a page that was correct becomes
+# wrong, and stays wrong until something asks for a build. That is exactly the
+# boundary this program exists to report, and it belongs here rather than in
+# whatever watches the result.
+#
+# Only these two sections. An announcement's `date` is the day it was posted
+# and still moves nothing; a minutes entry's is the day of the meeting it
+# records, which is in the past by the time it is filed.
+OCCASION_SECTIONS = ("meetings", "events")
+OCCASION_KEY = "date"
 
 
 def front_matter(text):
@@ -103,7 +117,14 @@ def main(argv):
         if fields.get("draft", "").lower() == "true":
             skipped_drafts += 1
             continue
-        for key in BOUNDARY_KEYS:
+        keys = list(BOUNDARY_KEYS)
+        # `page` is under the content directory given on the command line, so
+        # the section is the first part of the path relative to it.
+        parts = page.relative_to(content).parts
+        if parts and parts[0] in OCCASION_SECTIONS:
+            keys.append(OCCASION_KEY)
+
+        for key in keys:
             raw = fields.get(key)
             if not raw:
                 continue

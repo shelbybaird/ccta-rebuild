@@ -1,0 +1,80 @@
+{{/*
+  One month, drawn as a calendar.
+
+  Takes a `dict` of:
+    monthStart  the first day of the month to draw
+    occasions   the full list from `occasions.html`
+    showAddr    passed through, so a day cell can name the venue
+
+  Built as a real table rather than as boxes made of `div`s. A calendar IS a
+  table — days across, weeks down — and marking it up as one is what lets a
+  screen reader say "Thursday, 17 September" when it reaches a cell instead of
+  reading a wall of loose numbers. The weekday names are given in full for that
+  reason and shortened visually in the stylesheet, so the abbreviation is a
+  matter of appearance and never of what is announced.
+
+  Nothing here computes when a meeting falls. The third-Thursday rule is
+  written in the constitution, not in this template: each meeting is a piece of
+  content with its own date, so a meeting moved for a holiday moves here by
+  being edited, and this template has no rule of its own to get wrong.
+*/}}
+{{ $monthStart := .monthStart }}
+{{ $showAddr   := .showAddr }}
+{{ $monthKey   := $monthStart.Format "2006-01" }}
+
+{{/* Group everything by the day it falls on, so each cell is one lookup. */}}
+{{ $byDay := dict }}
+{{ range .occasions }}
+  {{ $k := .start.Format "2006-01-02" }}
+  {{ $byDay = merge $byDay (dict $k ((index $byDay $k | default slice) | append .)) }}
+{{ end }}
+
+{{ $lead  := int $monthStart.Weekday }}          {{/* Sunday is 0 */}}
+{{ $days  := ($monthStart.AddDate 0 1 -1).Day }} {{/* the month's last date */}}
+{{ $cells := add $lead $days }}
+{{ $weeks := math.Ceil (div (float $cells) 7) | int }}
+{{ $today := now.Format "2006-01-02" }}
+
+<table class="month">
+  <caption class="month__name">{{ $monthStart.Format "January 2006" }}</caption>
+  <thead>
+    <tr>
+      {{ range slice "Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" }}
+      <th scope="col"><span class="month__dayname">{{ . }}</span><span class="month__dayabbr" aria-hidden="true">{{ substr . 0 3 }}</span></th>
+      {{ end }}
+    </tr>
+  </thead>
+  <tbody>
+    {{ range $week := seq $weeks }}
+    <tr>
+      {{ range $col := seq 7 }}
+        {{ $cell := add (mul (sub $week 1) 7) $col }}
+        {{ $dayNum := sub $cell $lead }}
+        {{ if or (le $dayNum 0) (gt $dayNum $days) }}
+          <td class="month__pad"></td>
+        {{ else }}
+          {{ $date := $monthStart.AddDate 0 0 (sub $dayNum 1) }}
+          {{ $key  := $date.Format "2006-01-02" }}
+          {{ $on   := index $byDay $key | default slice }}
+          <td class="month__day{{ if $on }} month__day--has{{ end }}{{ if eq $key $today }} month__day--today{{ end }}">
+            <span class="month__num">{{ $dayNum }}{{ if eq $key $today }}<span class="visually-hidden"> (today)</span>{{ end }}</span>
+            {{/* Each entry is a dot and a label. On a telephone there is no
+                 room for seven columns of text, so the stylesheet keeps the dot
+                 and hides the label — which is a change of appearance only. The
+                 label stays in the markup and a screen reader still reads it,
+                 and the full details are in the cards above either way. */}}
+            {{ range $on }}
+              {{ $id := printf "%s-%s" .kind $key }}
+              <span class="month__entry month__entry--{{ .kind }}{{ if ne .status "scheduled" }} month__entry--{{ .status }}{{ end }}">
+                {{ if ge .start now }}<a href="#{{ $id }}">{{ end }}
+                <span class="month__dot" aria-hidden="true"></span><span class="month__label">{{ .title }}{{ if ne .status "scheduled" }} — {{ .status }}{{ end }}</span>
+                {{ if ge .start now }}</a>{{ end }}
+              </span>
+            {{ end }}
+          </td>
+        {{ end }}
+      {{ end }}
+    </tr>
+    {{ end }}
+  </tbody>
+</table>

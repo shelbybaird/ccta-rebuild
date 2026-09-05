@@ -1,0 +1,6 @@
+meetingDay: "third Thursday"
+meetingTime: "6:30 pm"
+monthsShown: 6
+defaultMinutes: 90
+showAddresses: true
+lede: "Every meeting and event the Association has scheduled, with the full details. The calendar can also be subscribed to, so that it keeps itself up to date in the calendar application you already use."

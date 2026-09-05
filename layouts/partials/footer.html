@@ -10,6 +10,18 @@
         {{ range site.Sections.ByWeight }}{{ if gt .Weight 0 }}
         <li><a href="{{ .RelPermalink }}">{{ default .Title .Params.menuLabel }}</a></li>
         {{ end }}{{ end }}
+        {{/* And any temporary page that put itself in the main menu. It is not
+             a section, so the loop above does not reach it — but this list
+             exists to be the second route to everything the menu offers, and a
+             page reachable only from the menu would defeat that. */}}
+        {{/* Marked in the link's name and not in colour. The menu's red band
+             is wrong here — it measures 2.97:1 on the footer's ground, under
+             the 3:1 a graphical mark needs, and these links are underlined, so
+             a band beneath one would read as a fault. The qualifier does the
+             same work in both lists and depends on no colour at all. */}}
+        {{ range where (where site.RegularPages "Section" "temporary") "Params.menuWhileLive" true }}
+        <li><a href="{{ .RelPermalink }}">{{ default .Title .Params.menuLabel }}<span class="visually-hidden"> (temporary page)</span></a></li>
+        {{ end }}
       </ul>
     </nav>
     <p>&copy; {{ now.Format "2006" }} Clermont County Township Association</p>

@@ -1,0 +1,32 @@
+{{/*
+  Fold one line of a calendar feed to the length the format allows.
+
+  A line in a calendar file may not exceed 75 OCTETS. A longer one is written
+  as several, each continuation beginning with a single space that a reader
+  removes when joining them back up. Long lines are ordinary here: a venue name
+  with a street address and a ZIP code passes 75 easily, and a strict parser
+  rejects the file rather than the line.
+
+  ⚠ Octets, not characters. An earlier version of this counted characters and
+  produced a 76-octet line the first time a venue name contained an em dash,
+  which is three octets and was counted as one. So the string is walked one
+  character at a time and the limit is applied to the bytes accumulated —
+  `split` with an empty separator gives whole characters, never half of one, so
+  a fold can never land inside a character and corrupt it.
+
+  The continuation's leading space counts toward its own 75, which is why the
+  limit is the same number on every line rather than one less on the first.
+*/}}
+{{- $s := printf "%v" . -}}
+{{- $out := slice -}}
+{{- $cur := "" -}}
+{{- range (split $s "") -}}
+  {{- if gt (add (len $cur) (len .)) 75 -}}
+    {{- $out = $out | append $cur -}}
+    {{- $cur = printf " %s" . -}}
+  {{- else -}}
+    {{- $cur = printf "%s%s" $cur . -}}
+  {{- end -}}
+{{- end -}}
+{{- $out = $out | append $cur -}}
+{{- return (delimit $out "\r\n") -}}

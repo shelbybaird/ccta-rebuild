@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.196.0/schema/sveltia-cms.json
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.205.4/schema/sveltia-cms.json
 
 # Editing configuration for the Clermont County Township Association website.
 #
@@ -272,6 +272,99 @@ collections:
         required: false
         hint: For example, joint meeting with the county, or moved from the 17th.
 
+  # ─── Special events ─────────────────────────────────────────────────────────
+  # A second dated type, beside Meetings rather than inside it.
+  #
+  # A meeting is defined by the constitution: the third Thursday, a status of
+  # scheduled, cancelled or moved, and minutes attached to it afterwards. A
+  # fundraising dinner or a holiday party is none of those things — it has a
+  # name of its own, an end time, a description, and no minutes will ever be
+  # attached to it. Adding a flag to Meetings would have meant a type where
+  # half the fields are meaningless for half the entries, and a schedule page
+  # that had to explain which rows were meetings.
+  #
+  # What the two share is only the part a calendar needs — when, where, and
+  # whether it is still happening — and they share it by both feeding the
+  # calendar and its subscribable feed, which is where they meet.
+  - name: events
+    label: Special Events
+    label_singular: Special event
+    icon: celebration
+    folder: /content/events
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: title
+    slug: '{{slug}}'
+    summary: "{{fields.date | date('D MMMM YYYY')}} — {{fields.title}}"
+    sortable_fields: [date, title]
+    fields:
+      - label: Name of the event
+        name: title
+        widget: string
+        required: true
+        hint: What it is called on the calendar. For example, Annual fundraising dinner.
+
+      - label: Date and time it starts
+        name: date
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: true
+
+      - label: Date and time it ends
+        name: end
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: false
+        hint: >-
+          Optional. Left empty, the calendar shows the event as lasting the
+          default length set on the Calendar settings screen.
+
+      - label: Location
+        name: location
+        widget: string
+        required: true
+        hint: The name of the place. For example, Union Township Civic Center.
+
+      - label: Address
+        name: address
+        widget: string
+        required: false
+        hint: >-
+          The street address. Shown on the calendar beneath the name of the
+          place, and given to anyone who subscribes to the calendar.
+
+      - label: Status
+        name: status
+        widget: select
+        default: scheduled
+        required: true
+        options:
+          - { label: Scheduled, value: scheduled }
+          - { label: Cancelled, value: cancelled }
+          - { label: Moved, value: moved }
+        hint: >-
+          A cancelled event stays on the calendar and is marked as cancelled,
+          so that somebody who has already put it in their diary is told.
+
+      - label: Note
+        name: note
+        widget: string
+        required: false
+        hint: A short qualification. For example, tickets required, or members only.
+
+      - label: Details
+        name: body
+        widget: markdown
+        required: false
+        hint: >-
+          What the event is, who it is for, and anything somebody needs to know
+          before coming. Shown on the event's own page and in the calendar
+          subscription.
+
   # ─── Minutes ────────────────────────────────────────────────────────────────
   - name: minutes
     label: Minutes
@@ -528,6 +621,196 @@ collections:
 
 # The alert banner is one file, so there is exactly one banner. It appears in
 # the sidebar on its own and opens straight into its form.
+  # ─── Temporary pages ────────────────────────────────────────────────────────
+  # A page of its own for one subject, which appears and disappears on a date.
+  #
+  # Why this is not an announcement. An announcement can hold the same words,
+  # the same picture and the same files — it was tried with a fundraising dinner
+  # on 5 September 2026. The flyer filled the first screen, so a reader met a
+  # poster and scrolled past all of it before reading anything, and the calls to
+  # action, being links inside a paragraph, read as sentence links rather than
+  # as the things a reader was being asked to do.
+  #
+  # So the two types differ in what they ARE, not in what they can hold. An
+  # announcement is a notice in a dated list, read in passing. This is a page
+  # somebody is sent to, and it is laid out to be acted on.
+  #
+  # Both are still wanted for a big event: the announcement says it is
+  # happening, and links here; this page answers every question about it.
+  - name: temporary
+    label: Temporary Pages
+    label_singular: Temporary page
+    icon: flag
+    folder: /content/temporary
+    extension: md
+    format: yaml-frontmatter
+    yaml_quote: true
+    create: true
+    identifier_field: title
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields: [date, title]
+    fields:
+      - label: Page title
+        name: title
+        widget: string
+        required: true
+
+      - label: Short name for the menu
+        name: menuLabel
+        widget: string
+        required: false
+        maxlength: 16
+        hint: >-
+          Used only if the page is put in the menu below. One or two words —
+          a full title makes the menu wrap to another row on a telephone.
+
+      - label: Put this page in the menu while it is showing
+        name: menuWhileLive
+        widget: boolean
+        default: false
+        required: false
+        hint: >-
+          Adds it to the end of the menu, marked in red so it does not look
+          like one of the Association's standing pages. It removes itself when
+          the page stops showing; there is nothing to undo afterwards.
+
+      - label: Date
+        name: date
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD'
+        default: '{{now}}'
+        required: true
+        hint: The day the page was written. It orders the list; it publishes nothing.
+
+      - label: Show from
+        name: publishDate
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ss'
+        input_timezone: America/New_York
+        required: false
+        hint: Leave empty to show it as soon as it is saved.
+
+      - label: Stop showing after
+        name: expiryDate
+        widget: datetime
+        type: date
+        format: 'YYYY-MM-DD[T23:59:59]'
+        input_timezone: America/New_York
+        required: false
+        hint: >-
+          What makes the page temporary. After this day it is gone from the
+          site and from the menu, and nobody has to remember to remove it. The
+          file stays, so the same page can be brought back next year by
+          changing two dates.
+
+      - label: Take this down
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: Removes the page at the next build, whatever its dates say.
+
+      - label: Opening paragraph
+        name: summary
+        widget: text
+        required: true
+        hint: >-
+          Two or three sentences at the top of the page, beside the picture.
+          What it is, when, where, and who it is for.
+
+      - label: Flyer or photograph
+        name: image
+        widget: object
+        required: false
+        fields:
+          - label: File
+            name: src
+            widget: image
+            required: false
+            media_folder: /static/uploads
+            public_folder: /uploads
+            media_libraries:
+              all:
+                max_file_size: 1048576
+          - label: Describe the picture
+            name: alt
+            widget: string
+            required: false
+            hint: >-
+              ⚠ A flyer carries the whole notice as a picture, which a screen
+              reader cannot read. Write out what it says — the date, the time,
+              the place and the price — or that reader gets nothing at all.
+
+      - label: Calls to action
+        name: callsToAction
+        label_singular: Action
+        widget: list
+        required: false
+        summary: '{{fields.label}}'
+        hint: >-
+          The buttons at the top of the page and again at the foot. Two is
+          usually right; a page asking for five things is asking for none.
+        fields:
+          - { label: Button text, name: label, widget: string, required: true }
+          - label: Where it goes
+            name: link
+            widget: string
+            required: true
+            hint: >-
+              A file on this site (/uploads/form.pdf), another page here
+              (/meetings/), an email address (mailto:treasurer@cctownship.org),
+              or an address elsewhere beginning https://.
+          - label: How prominent
+            name: emphasis
+            widget: select
+            default: primary
+            required: true
+            options:
+              - { label: Filled — the main thing being asked, value: primary }
+              - { label: Outlined — an alternative, value: secondary }
+
+      - label: Files
+        name: attachments
+        label_singular: File
+        widget: list
+        required: false
+        summary: '{{fields.title}}'
+        hint: Documents hosted on this site, listed at the foot of the page.
+        fields:
+          - { label: Title, name: title, widget: string, required: true }
+          - label: Document
+            name: file
+            widget: file
+            required: true
+            media_folder: /static/uploads
+            public_folder: /uploads
+            media_libraries:
+              all:
+                max_file_size: 10485760
+
+      - label: The page
+        name: body
+        widget: markdown
+        required: true
+
+# ─── Singletons ───────────────────────────────────────────────────────────────
+#
+# ⚠ A SECOND TOP-LEVEL LIST, AND THE END OF THIS FILE IS INSIDE IT.
+#
+# Everything above is a `collection` — a folder of entries an officer creates
+# and deletes. Everything below is a `singleton` — one screen editing one file
+# that always exists. The two are told apart by which list they are in and by
+# one key: a singleton names a `file`, a collection names a `folder`.
+#
+# Adding a new folder collection by appending to the foot of this file puts it
+# in the wrong list. The editor then reads it as a singleton, looks for the
+# `file` it does not have, and stops with `Cannot read properties of undefined
+# (reading 'match')` in the browser's console — which names neither this file
+# nor the entry at fault. That happened on 5 September 2026 and cost an hour.
+# A new folder collection goes ABOVE this line; a new single-file screen goes
+# below it.
 singletons:
   - name: banner
     label: Alert banner
@@ -612,3 +895,78 @@ singletons:
         default: false
         required: false
         hint: Removes the banner at the next build.
+
+  # ─── Calendar settings ──────────────────────────────────────────────────────
+  # The four settings the calendar reads, in a screen an officer can reach.
+  #
+  # These were in `hugo.toml` until the calendar was built, where nobody but a
+  # maintainer could change them: correcting the meeting time meant editing the
+  # site's own configuration by hand. That is the thing this rebuild exists to
+  # end, so they moved to `data/calendar.yml`, which Hugo reads as site data and
+  # this screen writes.
+  #
+  # ⚠ The editor rewrites that file whole on every save, so it carries values
+  # and no comments — anything explanatory written into it would be deleted the
+  # first time somebody changed a setting. The reasoning is in `hugo.toml`,
+  # beside the fall-back each setting has if this file loses a value.
+  - name: calendar_settings
+    label: Calendar settings
+    icon: tune
+    file: /data/calendar.yml
+    format: yaml
+    fields:
+      - label: Which day of the month the Association meets
+        name: meetingDay
+        widget: string
+        required: true
+        hint: >-
+          Written out, as it is read: third Thursday. This is the standing line
+          shown at the top of every page and on the meetings page. It does not
+          schedule anything — each meeting carries its own date.
+
+      - label: What time the meeting starts
+        name: meetingTime
+        widget: string
+        required: true
+        hint: For example, 6:30 pm.
+
+      - label: How many months the calendar shows
+        name: monthsShown
+        widget: number
+        value_type: int
+        min: 1
+        max: 24
+        default: 6
+        required: true
+        hint: >-
+          Counting the current one. Six reaches from a September meeting to the
+          following February.
+
+      - label: How long an event lasts when no end time is given
+        name: defaultMinutes
+        widget: number
+        value_type: int
+        min: 15
+        max: 600
+        default: 90
+        required: true
+        hint: >-
+          In minutes. Used only in the calendar subscription, where an entry
+          with no length at all shows as an instant, as though the meeting took
+          no time.
+
+      - label: Show each venue's street address on the calendar
+        name: showAddresses
+        widget: boolean
+        default: true
+        required: false
+        hint: >-
+          The meetings page shows the name of the venue only. The calendar is
+          the page built to carry the full details, and turning this off would
+          leave the address reachable only by subscribing to the calendar.
+
+      - label: The sentence under the calendar's heading
+        name: lede
+        widget: text
+        required: true
+        hint: Two or three lines. It is the first thing read on the page.

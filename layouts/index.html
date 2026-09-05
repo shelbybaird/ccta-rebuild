@@ -1,16 +1,67 @@
 {{ define "main" }}
 <h1>Clermont County Township Association</h1>
 
-{{ with (where (where site.RegularPages "Section" "meetings") "Date" "ge" now).Reverse }}
-  {{ with index . 0 }}
+{{/* The members are named here by one link and not by fourteen tiles. The home
+     page carried every member's logo in a row that scrolled, which put the
+     announcements and the next meeting below a band of pictures and made the
+     page an index of the membership rather than what is happening. The
+     membership is not news and does not change; it has a page of its own, and
+     this is the way to it. Changed on his direction, 5 September 2026. */}}
+{{ with site.GetPage "/townships" }}
+<p class="home__members"><a href="{{ .RelPermalink }}">{{ .Title }}</a></p>
+{{ end }}
+
+{{/* What the Association has coming up: the next meeting, and the next special
+     event when one is scheduled.
+
+     ⭐ THE NEXT OF EACH KIND, never simply the next two. Meetings are monthly,
+     so the next two occasions in an ordinary stretch are two meetings, and the
+     second card would spend itself on a date five weeks out while a dinner in
+     between went unmentioned. Taking one of each means the second card exists
+     for the thing that would otherwise be missed, and it disappears when there
+     is nothing to put in it. They are then shown in date order, so whichever
+     comes first is read first.
+
+     This read the meetings section alone until 5 September 2026, and a special
+     event could reach the home page only if somebody also wrote an
+     announcement about it — so an event entered in the calendar and nowhere
+     else was invisible to a reader who opens the home page and goes no
+     further. It now reads the same partial the calendar and the subscribable
+     feed read, so the three cannot disagree about what is next.
+
+     ⚠ The status is printed. It was not until 5 September 2026: a cancelled
+     meeting appeared here looking as though it were happening, unless whoever
+     cancelled it also happened to type a note. The calendar and the meetings
+     page both marked it and this page did not, which made the home page the
+     one place the news did not reach.
+
+     The venue is named and its address is not. The calendar is the page that
+     carries the full details, and the one link beneath the cards leads there —
+     once, not once per card. */}}
+{{ $ahead := where (partial "occasions.html" .) "start" "ge" now }}
+{{ $next := slice }}
+{{ with first 1 (where $ahead "kind" "meeting") }}{{ $next = $next | append (index . 0) }}{{ end }}
+{{ with first 1 (where $ahead "kind" "event") }}{{ $next = $next | append (index . 0) }}{{ end }}
+{{ with $next }}
 <section class="section">
-  <h2>Next meeting</h2>
-  <div class="note">
-    <p><strong>{{ .Date.Format "Monday, 2 January 2006" }} at {{ .Date.Format "3:04 pm" }}</strong><br>
-    {{ .Params.location }}{{ with .Params.note }} — {{ . }}{{ end }}</p>
+  <h2>Coming up</h2>
+  {{/* Side by side where there is width for it, so a second card costs nothing
+       in height and the announcements stay where they were. They stack on a
+       telephone, where there was never a second column to use. */}}
+  <div class="coming">
+    {{ range sort . "start" }}
+    <div class="{{ partial "occasion-classes.html" . }} coming__card">
+      <p class="occasion__kind">{{ if eq .kind "meeting" }}Meeting{{ else }}Special event{{ end }}</p>
+      <p><strong>{{ .start.Format "Monday, 2 January 2006" }} at {{ .start.Format "3:04 pm" }}</strong>{{ if ne .status "scheduled" }} <span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}<br>
+      {{/* An event is named and linked, because its name is what it is known by
+           and its page carries the description. A meeting is not: it has no
+           page of its own, and the label above has already said what it is. */}}
+      {{ $o := . }}{{ with .page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a> — {{ end }}{{ .location }}{{ with .note }} — {{ . }}{{ end }}</p>
+    </div>
+    {{ end }}
   </div>
+  <p class="coming__more"><a href="{{ (site.GetPage "/calendar").RelPermalink }}">The full calendar</a>, including the address of each venue.</p>
 </section>
-  {{ end }}
 {{ end }}
 
 {{ with first 4 (where site.RegularPages "Section" "news") }}
@@ -19,7 +70,10 @@
     {{ with site.GetPage "/news" }}<a href="{{ .RelPermalink }}">All announcements</a>{{ end }}</div>
   <ul class="posts">
     {{ range . }}
-    <li>
+    {{/* `note` is the card: the same panel the coming-up block wears, so an
+         announcement and a meeting read as the same kind of thing. It is one
+         rule in the stylesheet rather than a second copy of it here. */}}
+    <li class="note">
       <span class="post__date">{{ .Date.Format "2 January 2006" }}</span>
       <h3 class="post__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
       {{ with .Params.summary }}<p>{{ . }}</p>{{ end }}
@@ -29,29 +83,5 @@
 </section>
 {{ else }}
 <section class="section"><h2>Announcements</h2><p class="empty">No announcements at present.</p></section>
-{{ end }}
-
-{{ with site.GetPage "/townships" }}
-<section class="section">
-  <div class="section__head"><h2>{{ .Title }}</h2><a href="{{ .RelPermalink }}">All fourteen townships</a></div>
-  <p class="rail__hint">All fourteen members, listed alphabetically. Scroll to see them all.</p>
-  <ul class="rail">
-    {{ range .Pages.ByWeight }}
-    {{/* The tile is the picture and nothing else, as on the member townships
-         page. Each image already carries its township's name, so the alt text
-         is the link's only name and must never be empty. */}}
-    {{ $tileBg := "" }}
-    {{ with .Params.tileBackground }}
-      {{ if findRE "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" . }}{{ $tileBg = . }}{{ end }}
-    {{ end }}
-    <li class="card">
-      <a class="card__link" href="{{ .Params.url_ }}" target="_blank" rel="noopener">
-        <div class="card__media"{{ with $tileBg }} style="{{ printf "--tile-bg:%s" . | safeCSS }}"{{ end }}><img src="{{ partial "asset.html" .Params.image }}" alt="{{ .Title }}" loading="lazy"></div>
-        {{ partial "newtab-note.html" . }}
-      </a>
-    </li>
-    {{ end }}
-  </ul>
-</section>
 {{ end }}
 {{ end }}

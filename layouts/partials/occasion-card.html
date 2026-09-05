@@ -1,0 +1,46 @@
+{{/*
+  One meeting or one special event, with everything a reader needs to attend it.
+
+  Takes a `dict` of:
+    o         one entry from `occasions.html`
+    showAddr  whether to print the street address beside the venue name
+
+  ⭐ This is the page that carries the address. The schedule page shows the
+  venue's NAME and nothing more, and the address was reachable only by
+  subscribing to the feed — which meant a reader could learn that the meeting is
+  at the Union Township Civic Center and not learn where that is. The
+  Association meets somewhere different every month, so where is as much of the
+  announcement as when. The schedule page is unchanged; this is the page built
+  to carry the full details, and `showAddresses` in the calendar settings turns
+  it off for anyone who later decides otherwise.
+*/}}
+{{ $o := .o }}
+{{/* The identity the month grid links to. Built from the kind and the date, so
+     a day cell can point at the card that carries that day's full details. */}}
+{{ $id := printf "%s-%s" $o.kind ($o.start.Format "2006-01-02") }}
+<li id="{{ $id }}" class="{{ partial "occasion-classes.html" $o }} occasion">
+  <p class="occasion__kind">{{ if eq $o.kind "meeting" }}Meeting{{ else }}Special event{{ end }}</p>
+
+  <h3 class="occasion__title">
+    {{ with $o.page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a>{{ else }}{{ $o.title }}{{ end }}
+    {{ if ne $o.status "scheduled" }}<span class="tag tag--{{ $o.status }}">{{ $o.status }}</span>{{ end }}
+  </h3>
+
+  <p class="occasion__when">
+    <time datetime="{{ $o.start.Format "2006-01-02T15:04:05Z07:00" }}">{{ $o.start.Format "Monday 2 January 2006" }}, {{ $o.start.Format "3:04 pm" }}</time>
+    {{/* An end time is shown only where somebody set one. A meeting has none:
+         the constitution fixes when the Association sits down, not when it
+         gets up. */}}
+    {{ with $o.end }}<span class="occasion__until">until {{ .Format "3:04 pm" }}</span>{{ end }}
+  </p>
+
+  {{ with $o.location }}
+  <p class="occasion__where">
+    <span class="occasion__venue">{{ . }}</span>
+    {{ if and $.showAddr $o.address }}<span class="occasion__address">{{ $o.address }}</span>{{ end }}
+  </p>
+  {{ end }}
+
+  {{ with $o.note }}<p class="occasion__note">{{ . }}</p>{{ end }}
+  {{ with $o.page }}{{ with .Content }}<div class="occasion__body">{{ . }}</div>{{ end }}{{ end }}
+</li>

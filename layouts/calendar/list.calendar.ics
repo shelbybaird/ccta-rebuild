@@ -1,0 +1,89 @@
+{{- /*
+  The subscribable calendar feed.
+
+  This is the second rendering of the list the calendar page shows: same
+  content, same partial, one source. Subscribing to it puts the Association's
+  meetings and events into whatever calendar somebody already uses, and they
+  stay correct on their own — a meeting moved to a different hall changes here
+  and changes there, without anybody being told twice.
+
+  The whole file is assembled as a list of lines and written out once at the
+  foot, because the format is strict about line endings in a way a template is
+  not: every line ends CRLF, and a stray blank line from the template's own
+  layout would be a syntax error rather than whitespace. Nothing above emits a
+  character; the one statement that does is the last.
+
+  Times are written in UTC, with the Z that says so. The alternative is to
+  carry local times together with a full definition of United States Eastern
+  time and its daylight-saving rule, which is a second copy of something every
+  calendar application already knows and one more thing that could disagree
+  with the site.
+*/ -}}
+{{- $cal := hugo.Data.calendar -}}
+{{- $defaultMinutes := int (default 90 $cal.defaultMinutes) -}}
+{{- $stamp := now.UTC.Format "20060102T150405Z" -}}
+{{- $lines := slice -}}
+
+{{- $lines = $lines | append "BEGIN:VCALENDAR" -}}
+{{- $lines = $lines | append "VERSION:2.0" -}}
+{{- $lines = $lines | append "PRODID:-//Clermont County Township Association//cctownship.org//EN" -}}
+{{- $lines = $lines | append "CALSCALE:GREGORIAN" -}}
+{{- $lines = $lines | append "METHOD:PUBLISH" -}}
+{{- $lines = $lines | append (partial "ics-line.html" (printf "X-WR-CALNAME:%s" (partial "ics-escape.html" site.Title))) -}}
+{{- $lines = $lines | append "X-WR-TIMEZONE:America/New_York" -}}
+{{- /* How often a subscribing application should look again. Twelve hours is
+       well inside the notice anybody gets of a change, and light on a site
+       that is read a few hundred times a month. The two properties say the
+       same thing to two generations of calendar software. */ -}}
+{{- $lines = $lines | append "REFRESH-INTERVAL;VALUE=DURATION:PT12H" -}}
+{{- $lines = $lines | append "X-PUBLISHED-TTL:PT12H" -}}
+
+{{- range (partial "occasions.html" .) -}}
+  {{- $end := "" -}}
+  {{- with .end -}}
+    {{- $end = . -}}
+  {{- else -}}
+    {{- /* Nothing sets when a meeting ends — the constitution fixes when the
+           Association sits down, not when it gets up. A calendar entry with no
+           end at all shows as an instant, which reads as though the meeting
+           takes no time, so the default length from the calendar settings is
+           used instead. */ -}}
+    {{- $end = .start.Add (time.ParseDuration (printf "%dm" $defaultMinutes)) -}}
+  {{- end -}}
+
+  {{- $desc := slice -}}
+  {{- with .note }}{{ $desc = $desc | append . }}{{ end -}}
+  {{- with .body }}{{ $desc = $desc | append . }}{{ end -}}
+  {{- if ne .status "scheduled" }}{{ $desc = $desc | append (printf "This %s is %s." .kind .status) }}{{ end -}}
+
+  {{- $lines = $lines | append "BEGIN:VEVENT" -}}
+  {{- $lines = $lines | append (printf "UID:%s" .uid) -}}
+  {{- $lines = $lines | append (printf "DTSTAMP:%s" $stamp) -}}
+  {{- $lines = $lines | append (printf "DTSTART:%s" (.start.UTC.Format "20060102T150405Z")) -}}
+  {{- $lines = $lines | append (printf "DTEND:%s" ($end.UTC.Format "20060102T150405Z")) -}}
+  {{- $lines = $lines | append (partial "ics-line.html" (printf "SUMMARY:%s%s" (cond (ne .status "scheduled") (printf "%s: " (title .status)) "") (partial "ics-escape.html" .title))) -}}
+  {{- /* The venue's name and its street address in one value, which is what a
+         calendar application shows and what it hands to a map. This is the one
+         place the address has always been published; the calendar page now
+         carries it too, so nobody has to subscribe to learn where a meeting
+         is. */ -}}
+  {{- $where := .location -}}
+  {{- with .address }}{{ $where = cond (ne $where "") (printf "%s, %s" $where .) . }}{{ end -}}
+  {{- with $where -}}
+    {{- $lines = $lines | append (partial "ics-line.html" (printf "LOCATION:%s" (partial "ics-escape.html" .))) -}}
+  {{- end -}}
+  {{- with $desc -}}
+    {{- $lines = $lines | append (partial "ics-line.html" (printf "DESCRIPTION:%s" (partial "ics-escape.html" (delimit . " ")))) -}}
+  {{- end -}}
+  {{- $lines = $lines | append (printf "STATUS:%s" (cond (eq .status "cancelled") "CANCELLED" "CONFIRMED")) -}}
+  {{- with .page -}}
+    {{- $lines = $lines | append (partial "ics-line.html" (printf "URL:%s" .Permalink)) -}}
+  {{- end -}}
+  {{- $lines = $lines | append "END:VEVENT" -}}
+{{- end -}}
+
+{{- $lines = $lines | append "END:VCALENDAR" -}}
+{{- /* The trailing break is part of the format: every line ends with one,
+       including the last, and a strict parser reads a file that stops without
+       it as having been truncated. */ -}}
+{{- printf "%s\r\n" (delimit $lines "\r\n") -}}

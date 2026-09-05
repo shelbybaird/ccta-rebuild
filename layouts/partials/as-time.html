@@ -1,0 +1,14 @@
+{{/*
+  Read a front-matter field as a moment in time.
+
+  Hugo parses `date`, `publishDate`, `expiryDate` and `lastmod` into times of
+  its own accord and leaves every other field as whatever the file's format
+  made of it — which for a date typed into a field of our own is sometimes a
+  string and sometimes already a time, depending on the format and on how the
+  value was quoted when it was saved. A template that assumes either one breaks
+  on the other, and it breaks at build time on a file somebody has just edited,
+  which is the worst moment for it.
+*/}}
+{{- $v := . -}}
+{{- if eq (printf "%T" $v) "string" -}}{{- $v = time.AsTime $v "America/New_York" -}}{{- end -}}
+{{- return $v -}}

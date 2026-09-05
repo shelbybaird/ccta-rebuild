@@ -128,6 +128,29 @@
       publication can never change this page on its own. Raising the version is
       a deliberate edit, made and tested here first.
 
+      Raised from 0.196.0 to 0.205.4 on 5 September 2026, nineteen releases.
+      Two of them are the reason:
+
+        - 0.201.0 fixed a regression in which some date and time values were
+          written in a format other than the documented one. Every date on this
+          site that an officer types is a date and time field — the meetings,
+          the special events, the display windows on an announcement and on the
+          banner — so a date written in the wrong format is the one defect that
+          would reach every screen at once.
+        - 0.202.0 began checking the editing configuration against a schema as
+          the editor loads, and refuses to load on a configuration it finds
+          invalid. That is worth having: a mistake in that file now announces
+          itself here rather than by an officer finding a field missing. It
+          also means the file must be valid before this version ships, which is
+          what the check below is for.
+
+      0.202.0 itself required the `unsafe-eval` keyword in a page's script
+      policy, which this site will not grant. 0.203.1 replaced the validator
+      that needed it, so this pin skips past 0.202.x deliberately.
+
+      No security advisory affects 0.196.0; both advisories on record were
+      fixed well before it. This is not a patch — it is a fix and a check.
+
       Revisit at hardening (execution plan 6.3): whether to hold a copy of this
       file in the repository instead of fetching it. Doing so removes this one
       request, but not the others the editor makes at run time, and it adds an
@@ -137,6 +160,6 @@
       Nothing here is loaded by the website itself. Every page a visitor sees
       still loads no third-party resource at all.
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.196.0/dist/sveltia-cms.js"></script>
+    <script src="https://unpkg.com/@sveltia/cms@0.205.4/dist/sveltia-cms.js"></script>
   </body>
 </html>

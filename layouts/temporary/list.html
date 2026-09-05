@@ -1,0 +1,13 @@
+{{ define "main" }}
+{{/* Not in the menu, and normally empty. It exists because every temporary page
+     is built underneath this address, and a reader who removes the last part of
+     one should find something rather than a missing page. */}}
+<h1>{{ .Title }}</h1>
+{{ with .Pages }}
+<ul class="rows">
+  {{ range .ByDate.Reverse }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>{{ end }}
+</ul>
+{{ else }}
+<p class="empty">Nothing is running at the moment.</p>
+{{ end }}
+{{ end }}

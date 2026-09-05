@@ -1,0 +1,82 @@
+{{/*
+  Every dated thing the Association has on its calendar, meetings and special
+  events together, in one ordered list.
+
+  This partial exists so that the calendar page and the subscribable feed are
+  built from ONE source. They are two renderings of the same list, which is what
+  execution plan 3.4 asks for: publish the schedule as a page and as a feed,
+  from one source. A second gathering of the same content would be a second
+  place for the two to drift apart.
+
+  The two content types are deliberately different shapes and stay that way. A
+  meeting is constitutionally defined — the third Thursday, a status of
+  scheduled, cancelled or moved, minutes attached afterwards. A fundraising
+  dinner is none of those things, so it is its own type rather than a flag on a
+  meeting. What they share is the part a calendar needs: when, where, and
+  whether it is still happening. This partial is where that shared part is
+  named, and it is the only place that knows both types.
+
+  Each entry is a map, so a template downstream reads `.start` and `.location`
+  without knowing or caring which type it came from:
+
+    kind      "meeting" or "event", for the label and the styling
+    title     what to call it in a list
+    page      the event's own page, or nil for a meeting, which has none
+    start     when it begins
+    end       when it ends, or nil where nobody said
+    location  the venue's name
+    address   the street address, or empty
+    status    scheduled, cancelled or moved
+    note      the one-line qualification, if any
+    body      the event's description, or empty
+    uid       a stable identity for the feed — see below
+
+  ⚠ `uid` is load-bearing and must never change for an occasion that already
+  exists. A calendar application matches a subscribed event to the one it
+  already holds by this string alone. Change it and the reader's calendar keeps
+  the old copy and adds a second one beside it; a meeting moved to a new date
+  would show up twice rather than moving. It is built from the file's own
+  permanent name, which is what makes it stable across a change of date, venue
+  or status.
+*/}}
+
+{{ $occasions := slice }}
+
+{{ range (where site.RegularPages "Section" "meetings") }}
+  {{ $occasions = $occasions | append (dict
+      "kind"     "meeting"
+      "title"    "Association meeting"
+      "page"     nil
+      "start"    .Date
+      "end"      nil
+      "location" (.Params.location | default "")
+      "address"  (.Params.address  | default "")
+      "status"   (.Params.status   | default "scheduled")
+      "note"     (.Params.note     | default "")
+      "body"     ""
+      "uid"      (printf "meeting-%s@cctownship.org" .File.BaseFileName)
+  ) }}
+{{ end }}
+
+{{ range (where site.RegularPages "Section" "events") }}
+  {{/* An end time is optional, and a zero time is Hugo's way of saying the
+       field was left out. Passing that on as though it were a real time would
+       put every such event on a reader's calendar as ending in the year 1. */}}
+  {{ $end := "" }}
+  {{ with .Params.end }}{{ $end = partial "as-time.html" . }}{{ end }}
+  {{ $occasions = $occasions | append (dict
+      "kind"     "event"
+      "title"    .Title
+      "page"     .
+      "start"    .Date
+      "end"      $end
+      "location" (.Params.location | default "")
+      "address"  (.Params.address  | default "")
+      "status"   (.Params.status   | default "scheduled")
+      "note"     (.Params.note     | default "")
+      "body"     (.Plain | chomp)
+      "uid"      (printf "event-%s@cctownship.org" .File.BaseFileName)
+  ) }}
+{{ end }}
+
+{{ return (sort $occasions "start") }}

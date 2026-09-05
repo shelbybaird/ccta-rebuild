@@ -29,7 +29,7 @@
   <div class="feature__head">
     <div class="feature__intro">
       <h1>{{ .Title }}</h1>
-      {{ with .Params.summary }}<p class="lede">{{ . }}</p>{{ end }}
+      {{ with .Params.summary }}{{ partial "typed-paragraphs.html" . }}{{ end }}
 
       {{/* The actions sit here, above the fold and beside the picture, because
            this page exists to be acted on. A page with none simply has none. */}}

@@ -1,0 +1,31 @@
+{{/*
+  A plain-text field, printed as the paragraphs somebody typed into it.
+
+  Two fields are entered in the editor as plain text and printed by a template
+  rather than through Markdown: the calendar's opening sentence, and a temporary
+  page's opening paragraph. Both were printed inside a single `<p>`, so a blank
+  line typed between two paragraphs was stored faithfully and then rendered as
+  one run of text. Found on 5 September 2026 by typing one.
+
+  The first paragraph is the lede — larger and quieter, as every other page's
+  opening line is. Anything after it is ordinary body text, because a page with
+  three large grey paragraphs at the top has no lede at all.
+
+  Plain text is all that is printed. These fields are not Markdown and nothing
+  in them is treated as markup, which is what makes them safe for an officer to
+  type into: an angle bracket typed here reaches the page as an angle bracket.
+
+  Takes the field's value.
+*/}}
+{{- $text := replace (printf "%v" .) "\r\n" "\n" -}}
+{{- $first := true -}}
+{{- range split $text "\n\n" -}}
+  {{- with trim . " \n\t" -}}
+    {{- if $first -}}
+      <p class="lede">{{ . }}</p>
+      {{- $first = false -}}
+    {{- else -}}
+      <p>{{ . }}</p>
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

@@ -17,7 +17,7 @@
 {{ $past     := where $all "start" "lt" $now }}
 
 <h1>{{ .Title }}</h1>
-<p class="lede">{{ $cal.lede }}</p>
+{{ partial "typed-paragraphs.html" $cal.lede }}
 
 <div class="cal__subscribe">
   {{ with .OutputFormats.Get "calendar" }}

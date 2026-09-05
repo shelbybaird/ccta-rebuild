@@ -226,8 +226,8 @@ main { padding: var(--s7) 0 var(--s8); }
 
 /* --- Cards / grids ------------------------------------------------------ */
 .grid { display: grid; gap: var(--s5); list-style: none; margin: 0; padding: 0; }
-.grid--twp   { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
-.grid--offc  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.grid--twp   { grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); }
+.grid--offc  { grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); }
 
 .card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
 /* The panel behind a tile picture. A township whose logo is drawn in white for
@@ -311,7 +311,12 @@ article img { max-height: 70vh; width: auto; }
 /* Two cards where there are two, side by side, so the second costs no height
    and the announcements below stay where a reader last found them. Below the
    breakpoint they stack, because a telephone never had the second column. */
-.coming { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+ /* ⚠ `min(19rem, 100%)`, not `19rem`. A track floor wider than the space
+    available forces the PAGE wider, and at 320px — the width WCAG 2.1's reflow
+    criterion names — a 19rem floor overflowed by 4px and gave the whole site a
+    horizontal scrollbar. Found 2026-09-05 by measuring at that width. Every
+    other `auto-fit` grid on this page needs the same guard. */
+.coming { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr)); }
 .coming__card p:last-child { margin-bottom: 0; }
 .coming__more { margin-top: var(--s3); font-size: .9rem; color: var(--muted); }
 
@@ -379,7 +384,7 @@ article img { max-height: 70vh; width: auto; }
 .occasion:target { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 /* --- The month grids ----------------------------------------------------- */
-.cal__months { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.cal__months { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
 .month { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); table-layout: fixed; }
 .month__name { caption-side: top; text-align: left; font-weight: 700; color: var(--ink-strong); padding: var(--s3) var(--s3) var(--s2); font-size: 1.05rem; }
 .month th { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: var(--s1) 0; border-bottom: 1px solid var(--rule); }

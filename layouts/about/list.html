@@ -27,14 +27,7 @@
      the copy requested from the Ohio Township Association arrives. */}}
 <p class="lede">The Clermont County Township Association exists to defend township government in Clermont County and to support the officials who run it.</p>
 
-<p>Article IV of the constitution sets out its purposes: to protect the township as a unit of government, and to resist any effort to strip it of rights, duties or privileges it already holds; to bring township officials into regular contact with one another; to build a better working knowledge of what township office requires, by comparing experience and exchanging ideas; to seek legislation from the General Assembly that allows township government to work more effectively; and to secure for Ohio's township roads an equitable share of gasoline tax revenue, to be spent on those roads by township officials.</p>
-
-{{/* ⛔ REMOVE BEFORE THE SITE GOES INTO PRODUCTION. Listed in migration gate 9.
-     It carries the amber of the alert banner's "important" kind, which is the
-     site's existing mark for something true only for now. */}}
-<div class="note note--moved">
-  <p><strong>Before this site goes into production.</strong> The paragraph above is a plain-language summary of Article IV of the Association's constitution, updated and corrected — it is not the constitution's own wording. It was written because the statement carried by the Association's previous website reproduced only two of Article IV's purposes. It can be changed at any time before the site goes live, and the Association's own wording will replace it.</p>
-</div>
+<p>Article IV<a class="fn" href="#preproduction-note"><span aria-hidden="true">&#8224;</span><span class="visually-hidden"> — see the note at the foot of this page about this paragraph</span></a> of the constitution sets out its purposes: to protect the township as a unit of government, and to resist any effort to strip it of rights, duties or privileges it already holds; to bring township officials into regular contact with one another; to build a better working knowledge of what township office requires, by comparing experience and exchanging ideas; to seek legislation from the General Assembly that allows township government to work more effectively; and to secure for Ohio's township roads an equitable share of gasoline tax revenue, to be spent on those roads by township officials.</p>
 
 {{/* The roster is shown here as well as on its own page. Its entries still live
      in content/officers/ and are still edited there, and /officers/ still
@@ -46,4 +39,16 @@
   {{ partial "officer-roster.html" .Pages }}
 </section>
 {{ end }}
+{{/* ⛔ REMOVE BEFORE THE SITE GOES INTO PRODUCTION. Listed in migration gate 9.
+     It carries the amber of the alert banner's "important" kind, which is the
+     site's existing mark for something true only for now.
+
+     It sits at the FOOT of the page, reached by the dagger beside "Article IV",
+     rather than directly beneath the paragraph it qualifies. Between the two it
+     pushed the officer roster — the thing most readers come to this page for —
+     a screenful down for a note that is true only until the site goes live. */}}
+<div class="note note--moved" id="preproduction-note">
+  <p><strong><span aria-hidden="true">&#8224; </span>Before this site goes into production.</strong> The summary of Article IV at the top of this page is written in plain language, updated and corrected — it is not the constitution's own wording. It was written because the statement carried by the Association's previous website reproduced only two of Article IV's purposes. It can be changed at any time before the site goes live, and the Association's own wording will replace it.</p>
+</div>
+
 {{ end }}

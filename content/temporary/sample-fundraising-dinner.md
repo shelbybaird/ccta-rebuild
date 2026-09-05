@@ -1,10 +1,11 @@
 ---
 title: "SAMPLE — Annual Fundraising Dinner"
 menuLabel: "Dinner"
-date: 2026-09-05
-publishDate: 2026-09-05T08:00:00-04:00
-expiryDate: 2026-11-08T23:59:59-05:00
 menuWhileLive: true
+date: "2026-09-05"
+publishDate: "2026-09-05T08:00:00-04:00"
+expiryDate: "2026-11-08T23:59:59-05:00"
+draft: false
 summary: "Saturday 7 November 2026, six until nine in the evening, at the Union Township Civic Center. Proceeds support the Association's scholarship and training programs for township officials across Clermont County."
 image:
   src: "/uploads/SAMPLE-dinner-flyer.png"
@@ -23,11 +24,12 @@ attachments:
     file: "/uploads/SAMPLE-reservation-form.pdf"
 ---
 
-Tickets are $35 each, or $250 for a table of eight. **Reservations close on
-30 October** and the hall has been full for the last three years, so early
+Tickets are $35 each, or $250 for a table of eight. **Reservations close on**
+**30 October** and the hall has been full for the last three years, so early
 reservations are advised.
 
 ## How to reserve
+`some additional changed text for evaluation.`
 
 Download the reservation form, complete it, and return it with payment to the
 Treasurer. Townships reserving a full table are asked to send the names of those

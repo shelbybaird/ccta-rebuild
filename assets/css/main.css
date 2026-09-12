@@ -307,6 +307,11 @@ article img { max-height: 70vh; width: auto; }
 .officer dt { font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-top: var(--s2); }
 .officer dd { margin: 0; }
 
+/* --- The constitution --------------------------------------------------- */
+.constitution p, .constitution li { text-align: justify; }
+.constitution ol { max-width: var(--measure); margin: 0 0 var(--s4); }
+.constitution li { margin-bottom: var(--s4); }
+
 /* --- Coming up, on the home page ---------------------------------------- */
 /* Two cards where there are two, side by side, so the second costs no height
    and the announcements below stay where a reader last found them. Below the

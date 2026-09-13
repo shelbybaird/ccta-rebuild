@@ -55,8 +55,9 @@ media_libraries:
   # the page depending on a picture the Association does not hold, and a
   # description that stops being true if the picture changes.
   #
-  # An address can still be typed by hand: the editor offers no setting that
-  # removes that. Only a check at build time can refuse one.
+  # An address could otherwise be typed by hand as well. Each image field below
+  # turns that choice off with choose_url: false and refuses anything but an
+  # upload with a pattern; the check at build time stays as the backstop.
   stock_assets: false
   all:
     max_file_size: 1048576      # one megabyte
@@ -165,12 +166,17 @@ collections:
 
       # The image and its description are grouped rather than sitting side by
       # side, because that is the shape Sveltia documents for carrying alt text
-      # and the shape its own image field is expected to grow into. Adopting it
-      # now costs nothing: no announcement carries a photograph yet.
+      # and the shape its own image field is expected to grow into.
       # See sveltia/sveltia-cms discussion #802 and issue #936.
       # The object stays optional so an announcement without a photograph saves
       # normally, but its subfields are required, so once a photograph is added
       # it cannot be saved without a description.
+      #
+      # The photograph must be uploaded, never linked. choose_url: false removes
+      # the choice of typing a web address, and the pattern refuses any other
+      # value with a message in the form. The publish check would refuse a
+      # picture served from another site too, but only by failing the whole
+      # publish, well after the entry was saved.
       - label: Photograph
         name: image
         widget: object
@@ -183,6 +189,10 @@ collections:
             required: true
             media_folder: /static/uploads
             public_folder: /uploads
+            choose_url: false
+            pattern:
+              - '^/uploads/'
+              - 'Upload the photograph here rather than linking to one on another website.'
           - label: Describe the photograph
             name: alt
             widget: string
@@ -541,12 +551,17 @@ collections:
       # now will read this field and nothing else. The standard is set by the
       # page, not by taste: fourteen of these sit in a grid, and the grid only
       # reads as a grid while they are all the same shape and all filled.
+      # Uploaded, never linked: see the note on the announcement photograph.
       - label: Tile image
         name: image
         widget: image
         required: true
         media_folder: /static/images/townships
         public_folder: /images/townships
+        choose_url: false
+        pattern:
+          - '^/images/townships/'
+          - 'Upload the tile image here rather than linking to one on another website.'
         hint: >-
           This picture is the whole tile, so it has to carry the township's name
           itself — nothing is printed underneath it. Supply it at 370 by 240
@@ -720,6 +735,7 @@ collections:
           Two or three sentences at the top of the page, beside the picture.
           What it is, when, where, and who it is for.
 
+      # Uploaded, never linked: see the note on the announcement photograph.
       - label: Flyer or photograph
         name: image
         widget: object
@@ -731,6 +747,10 @@ collections:
             required: false
             media_folder: /static/uploads
             public_folder: /uploads
+            choose_url: false
+            pattern:
+              - '^/uploads/'
+              - 'Upload the flyer or photograph here rather than linking to one on another website.'
             media_libraries:
               all:
                 max_file_size: 1048576

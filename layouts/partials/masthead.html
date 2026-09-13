@@ -1,24 +1,21 @@
 <header class="masthead">
   <div class="wrap masthead__inner">
-    {{/* The logo and the title beside it are two links to the same place. Giving
-         the logo alt text would name it correctly but announce the same
-         destination twice in a row, so the logo is taken out of the reading
-         order and the tab order instead, and the title link is the one name
-         this destination has. Removing aria-hidden without also giving the
-         image alt text restores a link with no accessible name. */}}
-    <a class="masthead__logo" href="{{ site.Home.RelPermalink }}" aria-hidden="true" tabindex="-1"><img src="{{ "images/logo.png" | relURL }}" alt="" width="240" height="62"></a>
-    {{/* ⚠ THE NAME IS WRAPPED, NOT WRITTEN BARE, because on a telephone the
-         stylesheet hides it. The Association's name appeared in the masthead
-         and again as the page heading, within 200 pixels of each other and in
-         the same words. Hiding it visually rather than removing it keeps the
-         accessible name on this link — the logo beside it is deliberately
-         out of the reading order, so this text is the only name the link has,
-         and a link with no accessible name is a worse defect than the
-         repetition was. */}}
-    <a class="masthead__title" href="{{ site.Home.RelPermalink }}"><span class="masthead__name">Clermont County Township Association</span>
-      {{/* Read from the calendar settings an officer can edit, falling back to
-           the site configuration if that file is ever missing a value. */}}
-      <span>Meets the {{ default site.Params.meetingDay hugo.Data.calendar.meetingDay }} of the month, {{ default site.Params.meetingTime hugo.Data.calendar.meetingTime }}</span></a>
+    {{/* The logo is the link home, and its alt text is the one name that link
+         has. The Association's name is not written beside it as well: the logo
+         carries it, the home page says it again as its heading, and every page
+         carries it in the browser's title. */}}
+    <a class="masthead__logo" href="{{ site.Home.RelPermalink }}"><img src="{{ "images/logo.png" | relURL }}" alt="{{ site.Title }}" width="350" height="137"></a>
+    <div class="masthead__text">
+      {{/* The next meeting is not a setting. It is read from the meeting entries
+           through the same partial the calendar and the subscribable feed use,
+           so the three cannot disagree. A cancelled meeting is skipped and a
+           moved one says so. "Now" is the moment of the build, and a meeting's
+           start is a boundary `tools/next-boundary.py` reports, so this line
+           moves on at the first build after a meeting begins. It links to that
+           meeting's card on the calendar, which carries the venue's address. */}}
+      {{ $next := where (where (where (partial "occasions.html" .) "kind" "meeting") "status" "ne" "cancelled") "start" "ge" now }}
+      <p class="masthead__next">{{ with first 1 $next }}{{ with index . 0 }}<a href="{{ (site.GetPage "/calendar").RelPermalink }}#meeting-{{ .start.Format "2006-01-02" }}">Next meeting: {{ .start.Format "Monday 2 January, 3:04 pm" }}</a>{{ if eq .status "moved" }} (moved){{ end }}{{ end }}{{ else }}Next meeting: to be announced{{ end }}</p>
+    </div>
   </div>
 </header>
 <nav class="nav" aria-label="Main">

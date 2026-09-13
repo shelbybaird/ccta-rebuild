@@ -135,9 +135,14 @@ img { max-width: 100%; height: auto; }
 /* --- Header ------------------------------------------------------------- */
 .masthead { border-bottom: 1px solid var(--rule); background: var(--surface); }
 .masthead__inner { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; padding: var(--s4) 0; }
-.masthead__logo img { display: block; max-height: 62px; width: auto; }
-.masthead__title { font-weight: 700; color: var(--ink-strong); text-decoration: none; font-size: 1.15rem; line-height: 1.25; }
-.masthead__title span { display: block; font-weight: 400; color: var(--muted); font-size: .9rem; }
+/* The logo scales with the width of the screen: its own size where there is
+   room, smaller on a telephone, where the first screen is shared with the menu
+   and the banner. */
+.masthead__logo { flex: none; }
+.masthead__logo img { display: block; width: clamp(120px, 34vw, 350px); height: auto; }
+.masthead__text { min-width: 0; }
+.masthead__next { margin: 0; color: var(--muted); font-size: .9rem; }
+.masthead__next a { color: inherit; }
 
 .nav { border-bottom: 3px solid var(--signature); background: var(--surface); }
 .nav ul { display: flex; flex-wrap: wrap; gap: var(--s1); list-style: none; margin: 0; padding: 0; }
@@ -513,17 +518,10 @@ article img { max-height: 70vh; width: auto; }
   .nav a.nav__temporary { box-shadow: inset 3px 0 0 var(--signature); }
   .nav a.nav__temporary[aria-current] { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--signature) 80%, #fff); }
 
-  /* The masthead is the other half of the problem — 167 of those 469 pixels.
-     The logo shrinks and sits beside the name instead of above it. */
+  /* The masthead is the other half of the problem. The logo scales down with
+     the screen, and the next meeting stays beside it. */
   .masthead__inner { padding: var(--s3) 0; flex-wrap: nowrap; gap: var(--s3); }
-  .masthead__logo img { max-height: 42px; }
-  .masthead__title { font-size: 1rem; }
-  .masthead__title span { font-size: .8rem; }
-  /* The name goes, and only here. It is said again as the page's heading a
-     couple of hundred pixels below, in the same words. Hidden rather than
-     removed, so the link keeps its accessible name — the logo beside it is out
-     of the reading order on purpose and cannot supply one. */
-  .masthead__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .masthead__next { font-size: .8rem; }
 
   /* The banner is the largest single piece of furniture left. It is set
      smaller and tighter here, and its label moves onto the same line as the

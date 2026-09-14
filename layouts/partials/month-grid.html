@@ -22,11 +22,14 @@
 {{ $showAddr   := .showAddr }}
 {{ $monthKey   := $monthStart.Format "2006-01" }}
 
-{{/* Group everything by the day it falls on, so each cell is one lookup. */}}
+{{/* Group everything by the days it falls on, so each cell is one lookup. A
+     multi-day event is filed under every day it runs. */}}
 {{ $byDay := dict }}
-{{ range .occasions }}
-  {{ $k := .start.Format "2006-01-02" }}
-  {{ $byDay = merge $byDay (dict $k ((index $byDay $k | default slice) | append .)) }}
+{{ range $o := .occasions }}
+  {{ range $o.sessions }}
+    {{ $k := .start.Format "2006-01-02" }}
+    {{ $byDay = merge $byDay (dict $k ((index $byDay $k | default slice) | append $o)) }}
+  {{ end }}
 {{ end }}
 
 {{ $lead  := int $monthStart.Weekday }}          {{/* Sunday is 0 */}}
@@ -64,11 +67,10 @@
                  label stays in the markup and a screen reader still reads it,
                  and the full details are in the cards above either way. */}}
             {{ range $on }}
-              {{ $id := printf "%s-%s" .kind $key }}
               <span class="month__entry month__entry--{{ .kind }}{{ if ne .status "scheduled" }} month__entry--{{ .status }}{{ end }}">
-                {{ if ge .start now }}<a href="#{{ $id }}">{{ end }}
+                {{ if gt .until now }}<a href="#{{ .anchor }}">{{ end }}
                 <span class="month__dot" aria-hidden="true"></span><span class="month__label">{{ .title }}{{ if ne .status "scheduled" }} — {{ .status }}{{ end }}</span>
-                {{ if ge .start now }}</a>{{ end }}
+                {{ if gt .until now }}</a>{{ end }}
               </span>
             {{ end }}
           </td>

@@ -1,0 +1,100 @@
+{{/*
+  The days a special event runs, each with its own start and end, earliest first.
+
+  Takes the event's page. Returns a slice of maps:
+    start  when that day begins
+    end    when that day ends, or "" where nobody said
+
+  The first day is always the event's own "Date and time it starts" and "Date
+  and time it ends". A multi-day event adds further days in one of two ways,
+  chosen in the editor under "Multi-day event". Neither asks for a date, so a
+  mistyped year can only move the whole event, never stretch it across months:
+
+    sameTime  `day_count` days in a row, counting the first, each at the first
+              day's hours
+    eachDay   `more_days`, each with `after` (how many days after the day before
+              it, normally 1), a `start` time and an optional `end` time
+
+  ⭐ ONCE "MULTI-DAY EVENT" IS CHOSEN, THE START AND END DESCRIBE THE FIRST DAY
+  ALONE. Only the time of the end counts, on the start's own day. Hours that run
+  past midnight cannot be set on a multi-day event.
+
+  An end that is not after its start leaves that day with no set end, and the
+  build warns, so that no entry in the feed ever ends before it begins.
+
+  A day is added by calendar date rather than by 24 hours, so that 6:00 pm stays
+  6:00 pm on the far side of a change to or from daylight saving time. No event
+  is given more than 63 days.
+
+  ⚠ Three places apply these rules and must agree: this partial, which the site
+  is built from; `tools/next-boundary.py`, which decides when the site rebuilds;
+  and the preview in `static/admin/index.html`, which shows an officer the days
+  while they type. A change to one is a change to all three.
+*/}}
+{{- $page := . -}}
+{{- $maxDays := 63 -}}
+{{- $first := $page.Date -}}
+{{- $firstKey := $first.Format "2006-01-02" -}}
+{{- $firstEnd := "" -}}
+{{- with $page.Params.end }}{{ $firstEnd = partial "as-time.html" . }}{{ end -}}
+{{- $pattern := "" -}}
+{{- with $page.Params.multiDay }}{{ $pattern = .pattern | default "" }}{{ end -}}
+{{- $multi := in (slice "sameTime" "eachDay") $pattern -}}
+
+{{- with $firstEnd -}}
+  {{- if $multi -}}
+    {{- $closing := time.AsTime (printf "%sT%s" $firstKey ($firstEnd.Format "15:04:05")) "America/New_York" -}}
+    {{- if gt $closing $first -}}
+      {{- $firstEnd = $closing -}}
+    {{- else -}}
+      {{- warnf "%s: the first day's end, %s, is not after its start, %s, so each day has no set end." $page.File.Path ($firstEnd.Format "3:04 pm") ($first.Format "3:04 pm") -}}
+      {{- $firstEnd = "" -}}
+    {{- end -}}
+  {{- else if not (gt $firstEnd $first) -}}
+    {{- warnf "%s: the end is not after the start, so the event has no set end." $page.File.Path -}}
+    {{- $firstEnd = "" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $sessions := slice (dict "start" $first "end" $firstEnd) -}}
+
+{{- if eq $pattern "sameTime" -}}
+  {{- $count := int ($page.Params.multiDay.day_count | default 1) -}}
+  {{- if gt $count $maxDays -}}
+    {{- warnf "%s: a multi-day event is given %d days at most." $page.File.Path $maxDays -}}
+    {{- $count = $maxDays -}}
+  {{- end -}}
+  {{- if gt $count 1 -}}
+    {{- range $n := seq 1 (sub $count 1) -}}
+      {{- $end := "" -}}
+      {{- with $firstEnd }}{{ $end = .AddDate 0 0 $n }}{{ end -}}
+      {{- $sessions = $sessions | append (dict "start" ($first.AddDate 0 0 $n) "end" $end) -}}
+    {{- end -}}
+  {{- end -}}
+
+{{- else if eq $pattern "eachDay" -}}
+  {{- $previous := $first -}}
+  {{- range $i, $day := $page.Params.multiDay.more_days -}}
+    {{- $after := int ($day.after | default 1) -}}
+    {{- if lt $after 1 }}{{ $after = 1 }}{{ end -}}
+    {{- $date := $previous.AddDate 0 0 $after -}}
+    {{- $previous = $date -}}
+    {{- $key := $date.Format "2006-01-02" -}}
+    {{- if not $day.start -}}
+      {{- warnf "%s: day %d, %s, has no start time, so it is left out." $page.File.Path (add $i 2) ($date.Format "Monday 2 January 2006") -}}
+    {{- else if lt (len $sessions) $maxDays -}}
+      {{- $start := time.AsTime (printf "%sT%s" $key (partial "clock.html" $day.start)) "America/New_York" -}}
+      {{- $end := "" -}}
+      {{- with $day.end -}}
+        {{- $end = time.AsTime (printf "%sT%s" $key (partial "clock.html" .)) "America/New_York" -}}
+        {{- if not (gt $end $start) -}}
+          {{- warnf "%s: day %d, %s, ends before it starts, so it has no set end." $page.File.Path (add $i 2) ($date.Format "Monday 2 January 2006") -}}
+          {{- $end = "" -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $sessions = $sessions | append (dict "start" $start "end" $end) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return (sort $sessions "start") -}}

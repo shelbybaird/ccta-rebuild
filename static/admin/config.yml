@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.205.4/schema/sveltia-cms.json
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.211.5/schema/sveltia-cms.json
 
 # Editing configuration for the Clermont County Township Association website.
 #
@@ -86,6 +86,10 @@ media_libraries:
 # The editor's preview pane would render these entries with its own generic
 # markup rather than the website's, which would show an officer something that
 # is not what the page looks like. The site itself is the preview.
+#
+# The one exception is special events, which turn it back on for a preview of
+# their own: not a picture of the page, but the dates in words and a warning
+# for any that look wrong, because a mistyped year there is easy to miss.
 editor:
   preview: false
 
@@ -309,6 +313,12 @@ collections:
     slug: '{{slug}}'
     summary: "{{fields.date | date('D MMMM YYYY')}} — {{fields.title}}"
     sortable_fields: [date, title]
+    # The preview pane is off for every other type (see `editor` above) and on
+    # here, where it shows what the site will display for the dates typed and
+    # warns about ones that look wrong. The preview is drawn by the script at
+    # the foot of static/admin/index.html.
+    editor:
+      preview: true
     fields:
       - label: Name of the event
         name: title
@@ -323,6 +333,77 @@ collections:
         input_timezone: America/New_York
         required: true
 
+      # A multi-day event. It sits between the start and the end because an event
+      # is planned in that order: when it begins, how many days it runs, when each
+      # day closes. Nothing in it is a date: further days are counted from the
+      # first, so a mistyped year can only move the whole event. The editor cannot
+      # show a field only when another is chosen, so this is an optional group
+      # whose type choice shows only that type's fields. Three places read what is
+      # stored here and must agree: layouts/partials/event-sessions.html,
+      # tools/next-boundary.py and the preview in static/admin/index.html.
+      - label: Multi-day event
+        name: multiDay
+        widget: object
+        required: false
+        typeKey: pattern
+        hint: >-
+          Add this for an event that runs over more than one day. The first day is
+          the start above and the end below. To make it a one-day event again,
+          remove this with the × on its heading. Different places on different
+          days belong in the Note or the Details.
+        types:
+          - label: Same time every day
+            name: sameTime
+            widget: object
+            fields:
+              - label: Number of days, counting the first
+                name: day_count
+                widget: number
+                value_type: int
+                default: 2
+                min: 2
+                max: 63
+                required: true
+                hint: >-
+                  The days run one after another, each at the hours of the first
+                  day.
+          - label: Different times each day
+            name: eachDay
+            widget: object
+            fields:
+              - label: Each day after the first
+                name: more_days
+                widget: list
+                label_singular: day
+                required: true
+                min: 1
+                summary: '{{start}} to {{end}}'
+                fields:
+                  - label: Days after the day before
+                    name: after
+                    widget: number
+                    value_type: int
+                    default: 1
+                    min: 1
+                    max: 62
+                    required: true
+                    hint: 1 for the next day; 2 to leave a day out.
+                  - label: Starts at
+                    name: start
+                    widget: datetime
+                    type: time
+                    format: 'HH:mm'
+                    required: true
+                  - label: Ends at
+                    name: end
+                    widget: datetime
+                    type: time
+                    format: 'HH:mm'
+                    required: false
+                    hint: >-
+                      Optional. Left empty, this day lasts the default length set on
+                      the Calendar settings screen.
+
       - label: Date and time it ends
         name: end
         widget: datetime
@@ -331,7 +412,9 @@ collections:
         required: false
         hint: >-
           Optional. Left empty, the calendar shows the event as lasting the
-          default length set on the Calendar settings screen.
+          default length set on the Calendar settings screen. For a multi-day
+          event only the time counts: the hour the first day closes, and every
+          day's closing hour when each day runs at the same time.
 
       - label: Location
         name: location

@@ -1,0 +1,4 @@
+{{- /* One day's start and, where set, its end. Takes one session map. */ -}}
+{{- $s := . -}}
+<time datetime="{{ $s.start.Format "2006-01-02T15:04:05Z07:00" }}">{{ $s.start.Format "Monday 2 January 2006" }}, {{ $s.start.Format "3:04 pm" }}</time>
+{{- with $s.end }} <span class="occasion__until">until {{ if ne (.Format "2006-01-02") ($s.start.Format "2006-01-02") }}{{ .Format "Monday 2 January 2006" }}, {{ end }}{{ .Format "3:04 pm" }}</span>{{ end -}}

@@ -38,9 +38,20 @@
 {{- $lines = $lines | append "REFRESH-INTERVAL;VALUE=DURATION:PT12H" -}}
 {{- $lines = $lines | append "X-PUBLISHED-TTL:PT12H" -}}
 
-{{- range (partial "occasions.html" .) -}}
+{{- range $o := (partial "occasions.html" .) -}}
+  {{- $desc := slice -}}
+  {{- with .note }}{{ $desc = $desc | append . }}{{ end -}}
+  {{- with .body }}{{ $desc = $desc | append . }}{{ end -}}
+  {{- if ne .status "scheduled" }}{{ $desc = $desc | append (printf "This %s is %s." .kind .status) }}{{ end -}}
+
+  {{- /* One calendar entry per day, so that each day carries its own hours.
+         The first day keeps the occasion's own identity, which every entry had
+         before multi-day events existed; each further day adds its date to it,
+         so that changing one day never duplicates another in a reader's
+         calendar. */ -}}
+  {{- range $i, $s := $o.sessions -}}
   {{- $end := "" -}}
-  {{- with .end -}}
+  {{- with $s.end -}}
     {{- $end = . -}}
   {{- else -}}
     {{- /* Nothing sets when a meeting ends — the constitution fixes when the
@@ -48,38 +59,35 @@
            end at all shows as an instant, which reads as though the meeting
            takes no time, so the default length from the calendar settings is
            used instead. */ -}}
-    {{- $end = .start.Add (time.ParseDuration (printf "%dm" $defaultMinutes)) -}}
+    {{- $end = $s.start.Add (time.ParseDuration (printf "%dm" $defaultMinutes)) -}}
   {{- end -}}
-
-  {{- $desc := slice -}}
-  {{- with .note }}{{ $desc = $desc | append . }}{{ end -}}
-  {{- with .body }}{{ $desc = $desc | append . }}{{ end -}}
-  {{- if ne .status "scheduled" }}{{ $desc = $desc | append (printf "This %s is %s." .kind .status) }}{{ end -}}
-
+  {{- $uid := $o.uid -}}
+  {{- if gt $i 0 }}{{ $uid = replace $o.uid "@" (printf "-%s@" ($s.start.Format "20060102")) }}{{ end -}}
   {{- $lines = $lines | append "BEGIN:VEVENT" -}}
-  {{- $lines = $lines | append (printf "UID:%s" .uid) -}}
+  {{- $lines = $lines | append (printf "UID:%s" $uid) -}}
   {{- $lines = $lines | append (printf "DTSTAMP:%s" $stamp) -}}
-  {{- $lines = $lines | append (printf "DTSTART:%s" (.start.UTC.Format "20060102T150405Z")) -}}
+  {{- $lines = $lines | append (printf "DTSTART:%s" ($s.start.UTC.Format "20060102T150405Z")) -}}
   {{- $lines = $lines | append (printf "DTEND:%s" ($end.UTC.Format "20060102T150405Z")) -}}
-  {{- $lines = $lines | append (partial "ics-line.html" (printf "SUMMARY:%s%s" (cond (ne .status "scheduled") (printf "%s: " (title .status)) "") (partial "ics-escape.html" .title))) -}}
+  {{- $lines = $lines | append (partial "ics-line.html" (printf "SUMMARY:%s%s" (cond (ne $o.status "scheduled") (printf "%s: " (title $o.status)) "") (partial "ics-escape.html" $o.title))) -}}
   {{- /* The venue's name and its street address in one value, which is what a
          calendar application shows and what it hands to a map. This is the one
          place the address has always been published; the calendar page now
          carries it too, so nobody has to subscribe to learn where a meeting
          is. */ -}}
-  {{- $where := .location -}}
-  {{- with .address }}{{ $where = cond (ne $where "") (printf "%s, %s" $where .) . }}{{ end -}}
+  {{- $where := $o.location -}}
+  {{- with $o.address }}{{ $where = cond (ne $where "") (printf "%s, %s" $where .) . }}{{ end -}}
   {{- with $where -}}
     {{- $lines = $lines | append (partial "ics-line.html" (printf "LOCATION:%s" (partial "ics-escape.html" .))) -}}
   {{- end -}}
   {{- with $desc -}}
     {{- $lines = $lines | append (partial "ics-line.html" (printf "DESCRIPTION:%s" (partial "ics-escape.html" (delimit . "\n")))) -}}
   {{- end -}}
-  {{- $lines = $lines | append (printf "STATUS:%s" (cond (eq .status "cancelled") "CANCELLED" "CONFIRMED")) -}}
-  {{- with .page -}}
+  {{- $lines = $lines | append (printf "STATUS:%s" (cond (eq $o.status "cancelled") "CANCELLED" "CONFIRMED")) -}}
+  {{- with $o.page -}}
     {{- $lines = $lines | append (partial "ics-line.html" (printf "URL:%s" .Permalink)) -}}
   {{- end -}}
   {{- $lines = $lines | append "END:VEVENT" -}}
+  {{- end -}}
 {{- end -}}
 
 {{- $lines = $lines | append "END:VCALENDAR" -}}

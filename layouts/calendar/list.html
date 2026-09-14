@@ -12,9 +12,14 @@
      asks for one — so a meeting drops out of "what is coming up" at the next
      build after it happens rather than at midnight. `tools/next-boundary.py`
      is what keeps that gap short. */}}
-{{ $now      := now }}
-{{ $upcoming := where $all "start" "ge" $now }}
-{{ $past     := where $all "start" "lt" $now }}
+{{ $now       := now }}
+{{/* Three states, divided on each occasion's first start and on `until`, when
+     the whole of it is over. A multi-day event is happening from its first
+     day's start to its last day's end, overnight included, and the site
+     rebuilds at both moments because `tools/next-boundary.py` reports them. */}}
+{{ $happening := where (where $all "start" "le" $now) "until" "gt" $now }}
+{{ $upcoming  := where $all "start" "gt" $now }}
+{{ $past      := where $all "until" "le" $now }}
 
 <h1>{{ .Title }}</h1>
 {{ partial "typed-paragraphs.html" $cal.lede }}
@@ -27,6 +32,18 @@
   </p>
   {{ end }}
 </div>
+
+{{/* --- Happening now ----------------------------------------------------- */}}
+{{ with $happening }}
+<section class="section" aria-labelledby="now">
+  <div class="section__head"><h2 id="now">Happening now</h2></div>
+  <ul class="occasions">
+    {{ range . }}
+      {{ partial "occasion-card.html" (dict "o" . "showAddr" $showAddr) }}
+    {{ end }}
+  </ul>
+</section>
+{{ end }}
 
 {{/* --- What is coming up ------------------------------------------------ */}}
 <section class="section" aria-labelledby="upcoming">

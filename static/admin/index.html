@@ -128,6 +128,13 @@
       publication can never change this page on its own. Raising the version is
       a deliberate edit, made and tested here first.
 
+      Raised from 0.205.4 to 0.211.5 on 13 September 2026, twenty releases, to be
+      current before cutover. No security advisory affects 0.205.4. Two changes
+      matter here: 0.207.0 warns in the console about configuration keys it does
+      not know, and 0.209.0 names a new entry's file from the collection's `slug`
+      or `identifier_field` rather than always from a `title` field, which the
+      meetings and minutes collections do not have.
+
       Raised from 0.196.0 to 0.205.4 on 5 September 2026, nineteen releases.
       Two of them are the reason:
 
@@ -160,6 +167,180 @@
       Nothing here is loaded by the website itself. Every page a visitor sees
       still loads no third-party resource at all.
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.205.4/dist/sveltia-cms.js"></script>
+    <script src="https://unpkg.com/@sveltia/cms@0.211.5/dist/sveltia-cms.js"></script>
+    <script>
+      /*
+        The preview for special events: what the calendar will show for the
+        dates as they are typed, and a warning for any that look wrong.
+
+        Why it exists. A date picker makes a mistyped year easy to enter and
+        hard to see afterwards. On 13 September 2026 a test event entered with a
+        start in 2026 and its other days in 2027 was listed on the site as
+        happening now for a year, and nothing said so. This pane says so before
+        the entry is saved.
+
+        It applies the same rules as layouts/partials/event-sessions.html, which
+        the site is built from, and tools/next-boundary.py, which decides when
+        it rebuilds. The three must agree. Dates are handled as the wall-clock
+        values the editor stores, in Eastern time, and never converted through
+        the browser's own time zone.
+
+        Sveltia CMS sets window.CMS, window.createClass and window.h when its
+        script loads (read from the 0.211.5 bundle), so this runs without a
+        build step. The website's own pages carry no script; this page is the
+        editor, which the build's script check exempts.
+      */
+      (() => {
+        const ZONE = 'America/New_York';
+        const MAX_DAYS = 63;
+        const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const pad = (n) => String(n).padStart(2, '0');
+
+        // A date and time as the editor stores it, "YYYY-MM-DDTHH:mm:ss", kept as
+        // its parts so that no browser time zone can shift it.
+        const parseMoment = (text) => {
+          const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(text || ''));
+          return m ? { y: +m[1], mo: +m[2], d: +m[3], h: +m[4], mi: +m[5] } : null;
+        };
+        const parseClock = (text) => {
+          const m = /^(\d{1,2}):(\d{2})/.exec(String(text || ''));
+          return m ? { h: +m[1], mi: +m[2] } : null;
+        };
+        const addDays = (w, n) => {
+          const t = new Date(Date.UTC(w.y, w.mo - 1, w.d + n));
+          return { ...w, y: t.getUTCFullYear(), mo: t.getUTCMonth() + 1, d: t.getUTCDate() };
+        };
+        const atClock = (w, c) => ({ ...w, h: c.h, mi: c.mi });
+        const order = (w) => `${w.y}-${pad(w.mo)}-${pad(w.d)}T${pad(w.h)}:${pad(w.mi)}`;
+        const sameDate = (a, b) => a.y === b.y && a.mo === b.mo && a.d === b.d;
+        const dateText = (w) => `${WEEKDAYS[new Date(Date.UTC(w.y, w.mo - 1, w.d)).getUTCDay()]} ${w.d} ${MONTHS[w.mo - 1]} ${w.y}`;
+        const clockText = (w) => `${w.h % 12 === 0 ? 12 : w.h % 12}:${pad(w.mi)} ${w.h < 12 ? 'am' : 'pm'}`;
+        const nowInEastern = () => {
+          const parts = {};
+          new Intl.DateTimeFormat('en-US', {
+            timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+          }).formatToParts(new Date()).forEach((part) => { parts[part.type] = part.value; });
+          return parseMoment(`${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`);
+        };
+
+        // Each day of the event and anything that looks wrong, from the entry's
+        // data as a plain object.
+        const computeDays = (data, now) => {
+          const warnings = [];
+          const first = parseMoment(data.date);
+          if (!first) return { days: [], warnings: ['Choose the date and time the event starts.'] };
+
+          const group = data.multiDay || null;
+          const pattern = group ? group.pattern || '' : '';
+          const multi = pattern === 'sameTime' || pattern === 'eachDay';
+          if (group && !multi) {
+            warnings.push('Multi-day event is added but neither type is chosen, so the event is shown as one day.');
+          }
+
+          let firstEnd = parseMoment(data.end);
+          if (firstEnd && multi) {
+            const closing = atClock(first, firstEnd);
+            if (order(closing) > order(first)) {
+              firstEnd = closing;
+            } else {
+              warnings.push(`The first day's end, ${clockText(firstEnd)}, is not after its start, ${clockText(first)}, so each day will have no set end.`);
+              firstEnd = null;
+            }
+          } else if (firstEnd) {
+            if (order(firstEnd) <= order(first)) {
+              warnings.push('The end is not after the start, so the event will have no set end.');
+              firstEnd = null;
+            } else if (!sameDate(firstEnd, first)) {
+              warnings.push(`The end is on ${dateText(firstEnd)}, so the event is shown as one stretch through the night. For an event on several days, add Multi-day event.`);
+            }
+          }
+
+          const days = [{ start: first, end: firstEnd }];
+          if (pattern === 'sameTime') {
+            let count = parseInt(group.day_count, 10) || 1;
+            if (count < 2) warnings.push('Set the number of days to 2 or more.');
+            if (count > MAX_DAYS) {
+              warnings.push(`A multi-day event is given ${MAX_DAYS} days at most.`);
+              count = MAX_DAYS;
+            }
+            for (let n = 1; n < count; n += 1) {
+              days.push({ start: addDays(first, n), end: firstEnd ? addDays(firstEnd, n) : null });
+            }
+          } else if (pattern === 'eachDay') {
+            const more = Array.isArray(group.more_days) ? group.more_days : [];
+            if (!more.length) warnings.push('Add at least one day after the first.');
+            let previous = first;
+            more.forEach((item, i) => {
+              const after = Math.max(1, parseInt(item && item.after, 10) || 1);
+              const date = addDays(previous, after);
+              previous = date;
+              const label = `Day ${i + 2}, ${dateText(date)},`;
+              const startClock = parseClock(item && item.start);
+              if (!startClock) {
+                warnings.push(`${label} has no start time, so it is left out.`);
+                return;
+              }
+              if (days.length >= MAX_DAYS) return;
+              const start = atClock(date, startClock);
+              let end = null;
+              const endClock = parseClock(item.end);
+              if (endClock) {
+                end = atClock(date, endClock);
+                if (order(end) <= order(start)) {
+                  warnings.push(`${label} ends before it starts, so it will have no set end.`);
+                  end = null;
+                }
+              }
+              days.push({ start, end });
+            });
+          }
+          days.sort((a, b) => (order(a.start) < order(b.start) ? -1 : 1));
+
+          // The two slips a date picker makes easy: a year left at this one, or
+          // a year typed one too far.
+          if (now && order(first) < order(now)) {
+            warnings.push(`It starts in the past, on ${dateText(first)}. If that is not meant, check the year.`);
+          }
+          if (now && order(first) > order(addDays(now, 366))) {
+            warnings.push(`It starts more than a year from now, on ${dateText(first)}. If that is not meant, check the year.`);
+          }
+          return { days, warnings };
+        };
+
+        // The same wording as the event's page and the calendar card.
+        const dayLine = ({ start, end }) => `${dateText(start)}, ${clockText(start)}`
+          + (end ? ` until ${sameDate(start, end) ? '' : `${dateText(end)}, `}${clockText(end)}` : '');
+
+        const colors = { ink: '#1b2430', muted: '#5b6472', warn: '#8a1c1c', good: '#2e6b2e', panel: '#f3f0ea' };
+
+        const EventPreview = createClass({
+          render() {
+            const entryData = this.props.entry.get('data');
+            const data = entryData && typeof entryData.toJS === 'function' ? entryData.toJS() : {};
+            const { days, warnings } = computeDays(data, nowInEastern());
+            return h('div', { style: { fontFamily: 'system-ui, sans-serif', color: colors.ink, padding: '1rem', lineHeight: 1.5 } },
+              h('p', { style: { fontSize: '.75rem', textTransform: 'uppercase', letterSpacing: '.06em', color: colors.muted, margin: '0 0 .25rem' } }, 'What the calendar will show'),
+              h('h2', { style: { margin: '0 0 .5rem' } }, data.title || '(no name yet)'),
+              days.length
+                ? h('ul', { style: { listStyle: 'none', margin: '0 0 .75rem', padding: 0, fontWeight: 600 } },
+                  days.map((day, i) => h('li', { key: i }, dayLine(day))))
+                : null,
+              data.location ? h('p', { style: { margin: 0 } }, data.location) : null,
+              data.address ? h('p', { style: { margin: 0, color: colors.muted } }, data.address) : null,
+              h('div', { style: { marginTop: '1rem', padding: '.75rem 1rem', background: colors.panel, borderLeft: `4px solid ${warnings.length ? colors.warn : colors.good}` } },
+                warnings.length
+                  ? [
+                    h('p', { key: 'heading', style: { margin: '0 0 .25rem', fontWeight: 700, color: colors.warn } }, 'Check before saving'),
+                    h('ul', { key: 'list', style: { margin: 0, paddingLeft: '1.25rem', color: colors.warn } },
+                      warnings.map((text, i) => h('li', { key: i }, text))),
+                  ]
+                  : h('p', { style: { margin: 0, fontWeight: 600, color: colors.good } }, 'Nothing looks wrong with these dates.')));
+          },
+        });
+        CMS.registerPreviewTemplate('events', EventPreview);
+      })();
+    </script>
   </body>
 </html>

@@ -27,7 +27,7 @@ which in summer is four hours adrift.
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -36,14 +36,12 @@ SITE_ZONE = ZoneInfo("America/New_York")
 # These two dates move content in or out of the site, on any page.
 BOUNDARY_KEYS = ("publishDate", "expiryDate")
 
-# ⭐ AND `date`, on a meeting or a special event alone, since the calendar was
-# built. It was true until then that `date` was what a reader sees and what
-# orders a list, and that it published nothing on its own. The calendar page
-# divides what is coming up from what has already happened, and it divides on
-# that field — so the moment a meeting begins, a page that was correct becomes
-# wrong, and stays wrong until something asks for a build. That is exactly the
-# boundary this program exists to report, and it belongs here rather than in
-# whatever watches the result.
+# ⭐ AND the days of a meeting or a special event, since the calendar was built.
+# The calendar page and the home page divide what is happening now, what is
+# coming up and what has already happened, and they divide on when each day
+# begins and when the whole occasion is over. The moment either passes, a page
+# that was correct becomes wrong, and stays wrong until something asks for a
+# build. Those are exactly the boundaries this program exists to report.
 #
 # Only these two sections. An announcement's `date` is the day it was posted
 # and still moves nothing; a minutes entry's is the day of the meeting it
@@ -51,6 +49,9 @@ BOUNDARY_KEYS = ("publishDate", "expiryDate")
 OCCASION_SECTIONS = ("meetings", "events")
 OCCASION_KEY = "date"
 
+# The most days any event is given, as in `layouts/partials/event-sessions.html`
+# and the editor's preview, so that the three agree on its last day.
+MAX_DAYS = 63
 
 def front_matter(text):
     """Return the top-level scalars of a YAML front matter block.
@@ -75,6 +76,147 @@ def front_matter(text):
         value = value.strip().strip('"').strip("'")
         fields[key.strip()] = value
     return fields
+
+
+def multi_day(text):
+    """Return an event's `multiDay` group: its pattern, day count and further days.
+
+    The one nested block this program reads. The editor writes it as
+
+        multiDay:
+          pattern: sameTime            or  pattern: eachDay
+          day_count: 4                     more_days:
+                                             - after: 1
+                                               start: "08:00"
+                                               end: "14:00"
+
+    and nothing else in a page's front matter is nested under that key.
+    """
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}
+    group, item = None, None
+    for line in text[3:end].splitlines():
+        if line and line[0] not in " \t":
+            if group is not None:
+                break
+            if line.partition(":")[0].strip() == "multiDay":
+                group = {"more_days": []}
+            continue
+        if group is None:
+            continue
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("- "):
+            item = {}
+            group["more_days"].append(item)
+            stripped = stripped[2:].strip()
+        key, sep, value = stripped.partition(":")
+        if not sep:
+            continue
+        key, value = key.strip(), value.strip().strip('"').strip("'")
+        if item is not None and key in ("after", "start", "end"):
+            item[key] = value
+        elif key in ("pattern", "day_count"):
+            group[key] = value
+    return group or {}
+
+
+def default_minutes(content):
+    """The default length of a meeting or event, from the calendar settings."""
+    path = content.parent / "data" / "calendar.yml"
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return 90
+    for line in lines:
+        if line.startswith("defaultMinutes:"):
+            try:
+                return int(line.partition(":")[2].strip().strip('"').strip("'"))
+            except ValueError:
+                return 90
+    return 90
+
+
+def clock(value, day):
+    """A time of day, "08:00" or "08:00:00", on the given date, or None."""
+    parts = value.strip().split(":")
+    try:
+        hour, minute = int(parts[0]), int(parts[1])
+        return datetime(day.year, day.month, day.day, hour, minute, tzinfo=SITE_ZONE)
+    except (ValueError, IndexError):
+        return None
+
+
+def occasion_days(fields, text):
+    """Each day of a meeting or event as (start, end-or-None), earliest first.
+
+    Mirrors `layouts/partials/event-sessions.html`. Once an event is multi-day,
+    its end describes the first day alone: only the time counts, on the start's
+    own day. An end not after its start is no set end. Further days are counted
+    from the first by calendar date, not by 24 hours, so that a clock time holds
+    across a change to or from daylight saving time. Raises ValueError naming
+    the first value that cannot be read.
+    """
+    first = as_moment(fields.get("date"))
+    if first is None:
+        raise ValueError(f"date: {fields.get('date')}")
+    first_end = None
+    if fields.get("end"):
+        first_end = as_moment(fields["end"])
+        if first_end is None:
+            raise ValueError(f"end: {fields['end']}")
+    group = multi_day(text)
+    pattern = group.get("pattern")
+    if first_end is not None:
+        if pattern in ("sameTime", "eachDay"):
+            closing = first.replace(hour=first_end.hour, minute=first_end.minute,
+                                    second=first_end.second, microsecond=0)
+            first_end = closing if closing > first else None
+        elif first_end <= first:
+            first_end = None
+    days = [(first, first_end)]
+
+    if pattern == "sameTime":
+        try:
+            count = int(group.get("day_count") or 1)
+        except ValueError:
+            raise ValueError(f"multiDay day_count: {group.get('day_count')}")
+        for n in range(1, min(count, MAX_DAYS)):
+            day = first.date() + timedelta(days=n)
+            start = first.replace(year=day.year, month=day.month, day=day.day)
+            end = None
+            if first_end is not None:
+                end = first_end.replace(year=day.year, month=day.month, day=day.day)
+            days.append((start, end))
+
+    elif pattern == "eachDay":
+        previous = first.date()
+        for item in group["more_days"]:
+            try:
+                after = max(1, int(item.get("after") or 1))
+            except ValueError:
+                raise ValueError(f"multiDay after: {item.get('after')}")
+            day = previous + timedelta(days=after)
+            previous = day
+            if not item.get("start") or len(days) >= MAX_DAYS:
+                continue
+            start = clock(item["start"], day)
+            if start is None:
+                raise ValueError(f"multiDay day start: {item['start']}")
+            end = None
+            if item.get("end"):
+                end = clock(item["end"], day)
+                if end is None:
+                    raise ValueError(f"multiDay day end: {item['end']}")
+                if end <= start:
+                    end = None
+            days.append((start, end))
+
+    return sorted(days, key=lambda day: day[0])
 
 
 def as_moment(value):
@@ -102,6 +244,7 @@ def main(argv):
 
     content, out = Path(argv[1]), Path(argv[2])
     now = datetime.now(SITE_ZONE)
+    length = timedelta(minutes=default_minutes(content))
 
     scanned = 0
     skipped_drafts = 0
@@ -110,7 +253,8 @@ def main(argv):
 
     for page in sorted(content.rglob("*.md")):
         scanned += 1
-        fields = front_matter(page.read_text(encoding="utf-8", errors="replace"))
+        text = page.read_text(encoding="utf-8", errors="replace")
+        fields = front_matter(text)
         # A draft is never published, so its dates move nothing and must not
         # cause a build. The alert banner sat as a draft carrying a live expiry
         # while this was written, which is exactly the case that matters.
@@ -121,8 +265,18 @@ def main(argv):
         # `page` is under the content directory given on the command line, so
         # the section is the first part of the path relative to it.
         parts = page.relative_to(content).parts
-        if parts and parts[0] in OCCASION_SECTIONS:
-            keys.append(OCCASION_KEY)
+        if parts and parts[0] in OCCASION_SECTIONS and fields.get(OCCASION_KEY):
+            # Every day's start, and the moment the whole occasion is over: the
+            # last day's end, or its start plus the default length. The section
+            # index files carry no date and are passed over by the test above.
+            try:
+                days = occasion_days(fields, text)
+            except ValueError as err:
+                unreadable.append(f"{page}: {err}")
+                continue
+            last_start, last_end = days[-1]
+            moments = [start for start, _ in days] + [last_end or last_start + length]
+            future.extend(moment for moment in moments if moment > now)
 
         for key in keys:
             raw = fields.get(key)

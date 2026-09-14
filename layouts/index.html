@@ -44,7 +44,9 @@
      card links to that meeting on the meetings page, which shows the note in
      full; an event's name already links to its own page. */}}
 {{ $showAddr := ne (printf "%v" hugo.Data.calendar.showAddresses) "false" }}
-{{ $ahead := where (partial "occasions.html" .) "start" "ge" now }}
+{{/* Ahead means not yet over, so an event already under way stays on the home
+     page, marked as happening now, until its last day ends. */}}
+{{ $ahead := where (partial "occasions.html" .) "until" "gt" now }}
 {{ $next := slice }}
 {{ with first 1 (where $ahead "kind" "meeting") }}{{ $next = $next | append (index . 0) }}{{ end }}
 {{ with first 1 (where $ahead "kind" "event") }}{{ $next = $next | append (index . 0) }}{{ end }}
@@ -58,7 +60,7 @@
     {{ range sort . "start" }}
     <div class="{{ partial "occasion-classes.html" . }} coming__card">
       <p class="occasion__kind">{{ if eq .kind "meeting" }}Meeting{{ else }}Special event{{ end }}</p>
-      <p><strong>{{ .start.Format "Monday, 2 January 2006" }} at {{ .start.Format "3:04 pm" }}</strong>{{ if ne .status "scheduled" }} <span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}<br>
+      <p><strong>{{ .start.Format "Monday, 2 January 2006" }} at {{ .start.Format "3:04 pm" }}{{ if gt (len .sessions) 1 }}, through {{ (index .sessions (sub (len .sessions) 1)).start.Format "Monday 2 January" }}{{ end }}</strong>{{ if le .start now }} <span class="tag tag--now">Happening now</span>{{ end }}{{ if ne .status "scheduled" }} <span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}<br>
       {{/* An event is named and linked, because its name is what it is known by
            and its page carries the description. A meeting is not: it has no
            page of its own, and the label above has already said what it is. */}}

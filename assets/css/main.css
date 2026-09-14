@@ -303,6 +303,8 @@ article img { max-height: 70vh; width: auto; }
    The text is the band DARKENED rather than the band itself, because one band
    is light and one is dark and only a darkened form is legible on a pale tint
    either way. At 55% the pair measure 5.64:1 (moved) and 11.35:1 (cancelled). */
+/* An occasion under way: the accent, the site's existing mark for "look here". */
+.tag--now { color: var(--ink-strong); background: color-mix(in srgb, var(--accent) 16%, #fff); border-color: var(--accent); }
 .tag--cancelled { color:        color-mix(in srgb, var(--banner-cancel-bg) 55%, #000);
                   background:   color-mix(in srgb, var(--banner-cancel-bg) 10%, #fff);
                   border-color: color-mix(in srgb, var(--banner-cancel-bg) 32%, #fff); }
@@ -382,6 +384,9 @@ article img { max-height: 70vh; width: auto; }
 .occasion__title { font-size: 1.2rem; margin: 0 0 var(--s2); display: flex; flex-wrap: wrap; gap: var(--s2); align-items: baseline; }
 .occasion__when { margin: 0 0 var(--s1); font-weight: 600; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
 .occasion__until { font-weight: 400; color: var(--muted); }
+/* A multi-day event lists its days, each set like the single line it replaces. */
+.occasion__days { list-style: none; margin: 0 0 var(--s1); padding: 0; font-weight: 600; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+.occasion__days li + li { margin-top: 2px; }
 .occasion__where { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s3); align-items: baseline; }
 .occasion__venue { font-weight: 600; }
 /* The address is set quieter than the venue and never smaller than the body

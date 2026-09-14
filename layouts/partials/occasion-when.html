@@ -1,0 +1,25 @@
+{{/*
+  When an occasion happens: one line for a single day, one line per day for an
+  event that runs over several.
+
+  Takes the `sessions` slice from `occasions.html` or `event-sessions.html`.
+
+  An end time is shown only where somebody set one. A meeting has none: the
+  constitution fixes when the Association sits down, not when it gets up. An end
+  on a later day than its start names that day, or "until 5:00 pm" would read
+  as ending before it began.
+*/}}
+{{- $sessions := . -}}
+{{- if eq (len $sessions) 1 -}}
+{{- with index $sessions 0 }}
+<p class="occasion__when">
+  {{ partial "occasion-when-line.html" . }}
+</p>
+{{- end -}}
+{{- else }}
+<ul class="occasion__days">
+  {{- range $sessions }}
+  <li>{{ partial "occasion-when-line.html" . }}</li>
+  {{- end }}
+</ul>
+{{- end -}}

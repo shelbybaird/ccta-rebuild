@@ -1,0 +1,6 @@
+{{- /* A time of day as the editor stores it, "08:00" or "08:00:00", returned as
+       "08:00:00" so that it can be joined to a date and read as a moment. */ -}}
+{{- $t := printf "%v" . -}}
+{{- if eq (len $t) 5 }}{{ $t = printf "%s:00" $t }}{{ end -}}
+{{- if eq (len $t) 4 }}{{ $t = printf "0%s:00" $t }}{{ end -}}
+{{- return $t -}}

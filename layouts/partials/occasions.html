@@ -30,6 +30,16 @@
     note      the short qualification, if any
     body      the event's description, or empty
     uid       a stable identity for the feed — see below
+    sessions  each day it runs, earliest first, as maps of start and end; a
+              meeting has one, and a multi-day event one per day
+    until     when the whole occasion is over: the last day's end, or its
+              start plus the default length from the calendar settings
+    anchor    the card's identity on the calendar page, for links to it: the
+              date for a meeting, of which there is one a day, and the file's
+              own name for an event, since two events can share a day
+
+  `start` and `end` are the first day's, so that a template which knows nothing
+  of multi-day events still reads a sensible time.
 
   ⚠ `uid` is load-bearing and must never change for an occasion that already
   exists. A calendar application matches a subscribed event to the one it
@@ -41,6 +51,7 @@
 */}}
 
 {{ $occasions := slice }}
+{{ $length := time.ParseDuration (printf "%dm" (int (default 90 hugo.Data.calendar.defaultMinutes))) }}
 
 {{ range (where site.RegularPages "Section" "meetings") }}
   {{ $occasions = $occasions | append (dict
@@ -49,6 +60,9 @@
       "page"     nil
       "start"    .Date
       "end"      nil
+      "sessions" (slice (dict "start" .Date "end" ""))
+      "until"    (.Date.Add $length)
+      "anchor"   (printf "meeting-%s" (.Date.Format "2006-01-02"))
       "location" (.Params.location | default "")
       "address"  (.Params.address  | default "")
       "status"   (.Params.status   | default "scheduled")
@@ -62,14 +76,20 @@
   {{/* An end time is optional, and a zero time is Hugo's way of saying the
        field was left out. Passing that on as though it were a real time would
        put every such event on a reader's calendar as ending in the year 1. */}}
-  {{ $end := "" }}
-  {{ with .Params.end }}{{ $end = partial "as-time.html" . }}{{ end }}
+  {{ $sessions := partial "event-sessions.html" . }}
+  {{ $firstDay := index $sessions 0 }}
+  {{ $lastDay := index $sessions (sub (len $sessions) 1) }}
+  {{ $until := $lastDay.start.Add $length }}
+  {{ with $lastDay.end }}{{ $until = . }}{{ end }}
   {{ $occasions = $occasions | append (dict
       "kind"     "event"
       "title"    .Title
       "page"     .
-      "start"    .Date
-      "end"      $end
+      "start"    $firstDay.start
+      "end"      $firstDay.end
+      "sessions" $sessions
+      "until"    $until
+      "anchor"   (printf "event-%s" .File.BaseFileName)
       "location" (.Params.location | default "")
       "address"  (.Params.address  | default "")
       "status"   (.Params.status   | default "scheduled")

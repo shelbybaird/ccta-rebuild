@@ -20,10 +20,10 @@
   private repository's known-issues list.
 */}}
 {{ $o := .o }}
-{{/* The identity the month grid links to. Built from the kind and the date, so
-     a day cell can point at the card that carries that day's full details. */}}
-{{ $id := printf "%s-%s" $o.kind ($o.start.Format "2006-01-02") }}
-<li id="{{ $id }}" class="{{ partial "occasion-classes.html" $o }} occasion">
+{{/* The identity the month grid links to, built in `occasions.html`. Every day
+     of a multi-day event points at the one card that carries them all, and two
+     events on the same day each keep their own. */}}
+<li id="{{ $o.anchor }}" class="{{ partial "occasion-classes.html" $o }} occasion">
   <p class="occasion__kind">{{ if eq $o.kind "meeting" }}Meeting{{ else }}Special event{{ end }}</p>
 
   <h3 class="occasion__title">
@@ -31,13 +31,7 @@
     {{ if ne $o.status "scheduled" }}<span class="tag tag--{{ $o.status }}">{{ $o.status }}</span>{{ end }}
   </h3>
 
-  <p class="occasion__when">
-    <time datetime="{{ $o.start.Format "2006-01-02T15:04:05Z07:00" }}">{{ $o.start.Format "Monday 2 January 2006" }}, {{ $o.start.Format "3:04 pm" }}</time>
-    {{/* An end time is shown only where somebody set one. A meeting has none:
-         the constitution fixes when the Association sits down, not when it
-         gets up. */}}
-    {{ with $o.end }}<span class="occasion__until">until {{ .Format "3:04 pm" }}</span>{{ end }}
-  </p>
+  {{ partial "occasion-when.html" $o.sessions }}
 
   {{ with $o.location }}
   <p class="occasion__where">

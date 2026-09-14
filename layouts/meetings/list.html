@@ -1,17 +1,22 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
-<p class="lede">Every meeting on the Association's schedule, with its venue. A cancelled meeting stays listed and marked.</p>
-{{/* This page is the schedule of meetings and shows the venue by name. Where
-     each venue IS, together with any special event, is on the calendar — which
-     is also the page that can be subscribed to. */}}
-<p>The <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a> carries the full details of what is coming up, including the address of each venue, and can be subscribed to.</p>
-<ul class="rows">
+<p class="lede">Every meeting on the Association's schedule, with its venue and address. A cancelled meeting stays listed and marked.</p>
+{{/* This page is the schedule of meetings, with each venue's name and address.
+     The address follows `showAddresses` in the calendar settings, as it does on
+     the calendar. Special events are on the calendar, which is also the page
+     that can be subscribed to. The address links to Apple Maps only, for now,
+     for the reasons in the private repository's known-issues list. */}}
+{{ $showAddr := ne (printf "%v" hugo.Data.calendar.showAddresses) "false" }}
+<p>The <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a> carries every meeting and special event, and can be subscribed to.</p>
+<ul class="rows rows--meetings">
   {{ range .Pages.ByDate }}
-  <li>
+  <li id="meeting-{{ .Date.Format "2006-01-02" }}">
     <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Mon 2 Jan 2006" }}</time>
-    <span>{{ .Params.location }}</span>
-    {{ if ne .Params.status "scheduled" }}<span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}
-    {{ with .Params.note }}<span>{{ . }}</span>{{ end }}
+    <div class="rows__detail">
+      <span>{{ .Params.location }}{{ if ne .Params.status "scheduled" }} <span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}</span>
+      {{ if and $showAddr .Params.address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ .Params.address | urlquery }}">{{ .Params.address }}</a>{{ end }}
+      {{ with .Params.note }}<span class="rows__note">{{ . }}</span>{{ end }}
+    </div>
   </li>
   {{ end }}
 </ul>

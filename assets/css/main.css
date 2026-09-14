@@ -286,6 +286,14 @@ article img { max-height: 70vh; width: auto; }
 .rows li { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); align-items: baseline;
            padding: var(--s3) 0; border-bottom: 1px solid var(--rule); }
 .rows time, .rows .rows__date { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-strong); min-width: 11rem; }
+/* The meetings page reads as two columns: the date, and beside it the venue,
+   address and note, each on its own line and aligned on the left. The note keeps
+   the line breaks it was typed with, and a row reached from the home page's
+   details link is outlined like a calendar card. */
+.rows--meetings li { display: grid; grid-template-columns: 11rem 1fr; gap: var(--s1) var(--s4); align-items: start; }
+.rows__detail { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s1); }
+.rows__note { white-space: pre-line; }
+.rows li:target { outline: 3px solid var(--accent); outline-offset: 3px; }
 .tag { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
        padding: .15rem .5rem; border-radius: 999px; background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--rule); }
 /* A cancelled or moved meeting is the same signal as a banner of the same name,
@@ -379,15 +387,14 @@ article img { max-height: 70vh; width: auto; }
 /* The address is set quieter than the venue and never smaller than the body
    text it sits beside. It is the answer to "where is that", not a footnote. */
 .occasion__address { color: var(--muted); }
-.occasion__note { margin: var(--s2) 0 0; color: var(--muted); font-style: italic; }
+.occasion__note { margin: var(--s2) 0 0; color: var(--muted); font-style: italic; white-space: pre-line; }
 
 /* A footnote marker. Raised and set small, and given a target big enough to
    press: a dagger on its own is a few pixels wide, which is not a link anybody
    can hit on a telephone. */
 .fn { font-size: .8em; vertical-align: super; line-height: 0; padding: 0 .35em; text-decoration: none; }
 .fn:hover { text-decoration: underline; }
-.occasion__body { margin-top: var(--s3); }
-.occasion__body p:last-child { margin-bottom: 0; }
+.occasion__more { margin: var(--s2) 0 0; }
 /* An entry arrived at by following a link from a month grid is highlighted for
    a moment, so that the jump lands somewhere visible rather than dropping the
    reader into an undifferentiated column of cards. */
@@ -532,6 +539,7 @@ article img { max-height: 70vh; width: auto; }
   .banner__inner { padding: var(--s2) 0; gap: var(--s2); font-size: .9rem; line-height: 1.35; }
   .banner__label { font-size: .7rem; }
   .rows time, .rows .rows__date { min-width: 100%; }
+  .rows--meetings li { grid-template-columns: 1fr; }
   /* Seven columns across a telephone leave about forty pixels a day, which is
      room for the date and a mark and nothing else. The label stays in the
      markup and is still read aloud; the details are in the cards above. */

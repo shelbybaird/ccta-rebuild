@@ -260,8 +260,8 @@ collections:
         widget: string
         required: false
         hint: >-
-          Not shown on the schedule page. It supplies the location to anyone who
-          subscribes to the meeting calendar.
+          Shown beneath the venue on the home page, the meetings page and the
+          calendar, and supplied to anyone who subscribes to the calendar.
 
       - label: Status
         name: status
@@ -278,7 +278,7 @@ collections:
 
       - label: Note
         name: note
-        widget: string
+        widget: text
         required: false
         hint: For example, joint meeting with the county, or moved from the 17th.
 
@@ -959,15 +959,15 @@ singletons:
           with no length at all shows as an instant, as though the meeting took
           no time.
 
-      - label: Show each venue's street address on the calendar
+      - label: Show each venue's street address
         name: showAddresses
         widget: boolean
         default: true
         required: false
         hint: >-
-          The meetings page shows the name of the venue only. The calendar is
-          the page built to carry the full details, and turning this off would
-          leave the address reachable only by subscribing to the calendar.
+          Prints the address beneath the venue's name on the home page, the
+          meetings page and the calendar. Turned off, the address is reachable
+          only by subscribing to the calendar.
 
       - label: The sentence under the calendar's heading
         name: lede

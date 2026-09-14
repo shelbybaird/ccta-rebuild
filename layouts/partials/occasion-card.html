@@ -1,18 +1,23 @@
 {{/*
-  One meeting or one special event, with everything a reader needs to attend it.
+  One meeting or one special event, kept compact: what, when and where.
+
+  The note and details are not on the card. A meeting's card links to its row on
+  the meetings page, and an event's name links to its own page; both carry them
+  in full, and so does the subscribable feed.
 
   Takes a `dict` of:
     o         one entry from `occasions.html`
     showAddr  whether to print the street address beside the venue name
 
-  ⭐ This is the page that carries the address. The schedule page shows the
-  venue's NAME and nothing more, and the address was reachable only by
-  subscribing to the feed — which meant a reader could learn that the meeting is
-  at the Union Township Civic Center and not learn where that is. The
+  ⭐ The address is printed beneath the venue's name. It was once reachable only
+  by subscribing to the feed — which meant a reader could learn that the meeting
+  is at the Union Township Civic Center and not learn where that is. The
   Association meets somewhere different every month, so where is as much of the
-  announcement as when. The schedule page is unchanged; this is the page built
-  to carry the full details, and `showAddresses` in the calendar settings turns
-  it off for anyone who later decides otherwise.
+  announcement as when. The home page and the meetings page print it too, and
+  `showAddresses` in the calendar settings turns it off in all three places.
+  The address links to Apple Maps only, for now; the reasons, and the plan for
+  sending every device to its own map application at cutover, are in the
+  private repository's known-issues list.
 */}}
 {{ $o := .o }}
 {{/* The identity the month grid links to. Built from the kind and the date, so
@@ -37,10 +42,9 @@
   {{ with $o.location }}
   <p class="occasion__where">
     <span class="occasion__venue">{{ . }}</span>
-    {{ if and $.showAddr $o.address }}<span class="occasion__address">{{ $o.address }}</span>{{ end }}
+    {{ if and $.showAddr $o.address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ $o.address | urlquery }}">{{ $o.address }}</a>{{ end }}
   </p>
   {{ end }}
 
-  {{ with $o.note }}<p class="occasion__note">{{ . }}</p>{{ end }}
-  {{ with $o.page }}{{ with .Content }}<div class="occasion__body">{{ . }}</div>{{ end }}{{ end }}
+  {{ if eq $o.kind "meeting" }}<p class="occasion__more"><a href="{{ (site.GetPage "/meetings").RelPermalink }}#meeting-{{ $o.start.Format "2006-01-02" }}">Meeting details</a></p>{{ end }}
 </li>

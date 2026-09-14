@@ -35,9 +35,15 @@
      page both marked it and this page did not, which made the home page the
      one place the news did not reach.
 
-     The venue is named and its address is not. The calendar is the page that
-     carries the full details, and the one link beneath the cards leads there —
-     once, not once per card. */}}
+     The venue is named and its address printed beneath it, because not every
+     reader goes on to the calendar and the Association meets somewhere
+     different every month. `showAddresses` in the calendar settings turns the
+     address off here as it does on the calendar. The address links to Apple Maps only, for now; the reasons, and the plan for sending every device to its own map application at cutover, are in the private repository's known-issues list.
+
+     The card carries no note, so that it stays a few lines long. A meeting's
+     card links to that meeting on the meetings page, which shows the note in
+     full; an event's name already links to its own page. */}}
+{{ $showAddr := ne (printf "%v" hugo.Data.calendar.showAddresses) "false" }}
 {{ $ahead := where (partial "occasions.html" .) "start" "ge" now }}
 {{ $next := slice }}
 {{ with first 1 (where $ahead "kind" "meeting") }}{{ $next = $next | append (index . 0) }}{{ end }}
@@ -56,11 +62,11 @@
       {{/* An event is named and linked, because its name is what it is known by
            and its page carries the description. A meeting is not: it has no
            page of its own, and the label above has already said what it is. */}}
-      {{ $o := . }}{{ with .page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a> — {{ end }}{{ .location }}{{ with .note }} — {{ . }}{{ end }}</p>
+      {{ $o := . }}{{ with .page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a> — {{ end }}{{ .location }}{{ if and $showAddr .address }}<br><a class="occasion__address" href="https://maps.apple.com/?q={{ .address | urlquery }}">{{ .address }}</a>{{ end }}{{ if eq .kind "meeting" }}<br><a href="{{ (site.GetPage "/meetings").RelPermalink }}#meeting-{{ .start.Format "2006-01-02" }}">Meeting details</a>{{ end }}</p>
     </div>
     {{ end }}
   </div>
-  <p class="coming__more"><a href="{{ (site.GetPage "/calendar").RelPermalink }}">The full calendar</a>, including the address of each venue.</p>
+  <p class="coming__more"><a href="{{ (site.GetPage "/calendar").RelPermalink }}">The full calendar</a>, with every meeting and event the Association has scheduled.</p>
 </section>
 {{ end }}
 

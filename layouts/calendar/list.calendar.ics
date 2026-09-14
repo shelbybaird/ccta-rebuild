@@ -73,7 +73,7 @@
     {{- $lines = $lines | append (partial "ics-line.html" (printf "LOCATION:%s" (partial "ics-escape.html" .))) -}}
   {{- end -}}
   {{- with $desc -}}
-    {{- $lines = $lines | append (partial "ics-line.html" (printf "DESCRIPTION:%s" (partial "ics-escape.html" (delimit . " ")))) -}}
+    {{- $lines = $lines | append (partial "ics-line.html" (printf "DESCRIPTION:%s" (partial "ics-escape.html" (delimit . "\n")))) -}}
   {{- end -}}
   {{- $lines = $lines | append (printf "STATUS:%s" (cond (eq .status "cancelled") "CANCELLED" "CONFIRMED")) -}}
   {{- with .page -}}

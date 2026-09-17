@@ -1,5 +1,6 @@
 ---
-title: No notice at present
-noticeKind: notice
-draft: true
+title: 'SAMPLE: Dinner reservations close October 30th.'
+noticeKind: important
+announcement: news/sample-annual-fundraising-dinner-on-7-november
+draft: false
 ---

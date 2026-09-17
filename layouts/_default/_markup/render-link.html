@@ -1,0 +1,10 @@
+{{- /* A link written in the text of an entry, including the one the editor's
+       picture component wraps around a picture. A path on this site gets the
+       same treatment as a picture's address, for the same reason; every other
+       destination is written out as Hugo would write it. */ -}}
+{{- $href := .Destination -}}
+{{- if and (hasPrefix $href "/") (not (hasPrefix $href "//")) -}}
+  {{- $href = partial "asset.html" $href -}}
+{{- end -}}
+<a href="{{ $href | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- /* chomp trailing newline */ -}}

@@ -1,0 +1,12 @@
+{{- /* A picture placed in the text of an entry. The editor writes its address
+       beginning with a slash, as it does for every upload, and Hugo's own
+       rendering passes that through unchanged, which points outside the site
+       whenever it is served from a subdirectory. So a path on this site goes
+       through the same partial as every other upload; an address beginning
+       with two slashes or a scheme is left alone for the publish check. */ -}}
+{{- $src := .Destination -}}
+{{- if and (hasPrefix $src "/") (not (hasPrefix $src "//")) -}}
+  {{- $src = partial "asset.html" $src -}}
+{{- end -}}
+<img src="{{ $src }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}>
+{{- /* chomp trailing newline */ -}}

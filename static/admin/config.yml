@@ -181,6 +181,9 @@ collections:
       # value with a message in the form. The publish check would refuse a
       # picture served from another site too, but only by failing the whole
       # publish, well after the entry was saved.
+      # Until the entry is saved, Sveltia checks a new upload by its bare file
+      # name, with no folder in front of it, so the pattern accepts a name with
+      # no slash or colon as well. A web address always carries one.
       - label: Photograph
         name: image
         widget: object
@@ -195,7 +198,7 @@ collections:
             public_folder: /uploads
             choose_url: false
             pattern:
-              - '^/uploads/'
+              - '^(/uploads/|[^/:]+$)'
               - 'Upload the photograph here rather than linking to one on another website.'
           - label: Describe the photograph
             name: alt
@@ -643,7 +646,7 @@ collections:
         public_folder: /images/townships
         choose_url: false
         pattern:
-          - '^/images/townships/'
+          - '^(/images/townships/|[^/:]+$)'
           - 'Upload the tile image here rather than linking to one on another website.'
         hint: >-
           This picture is the whole tile, so it has to carry the township's name
@@ -832,7 +835,7 @@ collections:
             public_folder: /uploads
             choose_url: false
             pattern:
-              - '^/uploads/'
+              - '^(/uploads/|[^/:]+$)'
               - 'Upload the flyer or photograph here rather than linking to one on another website.'
             media_libraries:
               all:

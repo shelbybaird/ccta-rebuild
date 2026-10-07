@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.211.5/schema/sveltia-cms.json
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.231.0/schema/sveltia-cms.json
 
 # Editing configuration for the Clermont County Township Association website.
 #
@@ -111,7 +111,14 @@ collections:
     format: yaml-frontmatter
     yaml_quote: true
     create: true
-    slug: '{{slug}}'
+    # The slug is the entry's web address, made from the entry when it is
+    # first saved. It cannot be edited, then or later: a renamed entry moves
+    # to a new address and every link to the old one breaks. Every collection
+    # below sets the same, because from Sveltia CMS 0.221.0 a slug left as a
+    # plain string can be edited even on a saved entry.
+    slug:
+      template: '{{slug}}'
+      editable: false
     summary: '{{title}}'
     sortable_fields: [date, title]
     fields:
@@ -246,7 +253,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: location
-    slug: "{{fields.date | date('YYYY-MM-DD')}}"
+    slug:
+      template: "{{fields.date | date('YYYY-MM-DD')}}"
+      editable: false
     summary: "{{fields.date | date('D MMMM YYYY')}} — {{fields.location}}"
     sortable_fields: [date]
     fields:
@@ -313,7 +322,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: title
-    slug: '{{slug}}'
+    slug:
+      template: '{{slug}}'
+      editable: false
     summary: "{{fields.date | date('D MMMM YYYY')}} — {{fields.title}}"
     sortable_fields: [date, title]
     # The preview pane is off for every other type (see `editor` above) and on
@@ -472,7 +483,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: date
-    slug: "{{fields.date | date('YYYY-MM-DD')}}"
+    slug:
+      template: "{{fields.date | date('YYYY-MM-DD')}}"
+      editable: false
     summary: "Minutes of {{fields.date | date('D MMMM YYYY')}}"
     sortable_fields: [date]
     # There is no title field. The archive labels each entry from its date, and
@@ -513,7 +526,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: name
-    slug: '{{fields.office}}-{{fields.name}}'
+    slug:
+      template: '{{fields.office}}-{{fields.name}}'
+      editable: false
     summary: '{{fields.office}} — {{fields.name}}'
     # No ordering here, deliberately. The roster is shown in the order Article V
     # names the offices, worked out from the office itself, so there is no
@@ -611,6 +626,9 @@ collections:
     create: false
     delete: false
     identifier_field: title
+    slug:
+      template: '{{slug}}'
+      editable: false
     summary: '{{title}}'
     # Alphabetical unless deliberately changed. Use the Reorder button above
     # the list; Hugo reads the resulting number from `weight`, which is why the
@@ -680,7 +698,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: title
-    slug: "{{fields.adopted | date('YYYY-MM-DD')}}"
+    slug:
+      template: "{{fields.adopted | date('YYYY-MM-DD')}}"
+      editable: false
     summary: '{{title}}'
     sortable_fields: [adopted]
     # One entry per ADOPTED VERSION, which is what gives the page an amendment
@@ -748,7 +768,9 @@ collections:
     yaml_quote: true
     create: true
     identifier_field: title
-    slug: '{{slug}}'
+    slug:
+      template: '{{slug}}'
+      editable: false
     summary: '{{title}}'
     sortable_fields: [date, title]
     fields:
@@ -821,7 +843,9 @@ collections:
           Two or three sentences at the top of the page, beside the picture.
           What it is, when, where, and who it is for.
 
-      # Uploaded, never linked: see the note on the announcement photograph.
+      # Uploaded, never linked, and described: see the note on the announcement
+      # photograph, which this follows. The picture is optional; once one is
+      # added, the page cannot be saved without its description.
       - label: Flyer or photograph
         name: image
         widget: object
@@ -830,7 +854,7 @@ collections:
           - label: File
             name: src
             widget: image
-            required: false
+            required: true
             media_folder: /static/uploads
             public_folder: /uploads
             choose_url: false
@@ -843,7 +867,7 @@ collections:
           - label: Describe the picture
             name: alt
             widget: string
-            required: false
+            required: true
             hint: >-
               ⚠ A flyer carries the whole notice as a picture, which a screen
               reader cannot read. Write out what it says — the date, the time,

@@ -128,6 +128,28 @@
       publication can never change this page on its own. Raising the version is
       a deliberate edit, made and tested here first.
 
+      Raised from 0.211.5 to 0.231.0 on 7 October 2026, forty-seven releases.
+      Six security advisories affect 0.211.5. Four reach this site, all rated
+      low: fixed in 0.221.2 and 0.221.7, one of them a script carried inside an
+      SVG upload, which this editor accepts. The other two, both medium, do
+      not: one is GitLab's alone, and one (0.230.1) is in the review queue this
+      site does not use. Six other changes matter here:
+
+        - 0.212.0 stopped the freeze that followed renaming an unsaved upload
+          with the pencil beside its file name. Its release notes do not say
+          so; the change was found in the source.
+        - 0.215.0: deleting a picture now clears the fields holding it, and
+          deleting an entry updates any entry that points to it, as the alert
+          banner points to an announcement.
+        - 0.218.0: the asset screens browse folder by folder.
+        - 0.221.0 lets an officer rename a saved entry, which changes its web
+          address, unless the collection says otherwise. Every collection in
+          config.yml now sets `editable: false` on its slug.
+        - 0.224.0: signing in requires write access to the repository.
+        - 0.225.0: anyone who cannot push to a protected `main` gets a
+          read-only editor. Protecting the branch (execution plan 6.2) has to
+          leave ordinary content open to the officers who edit it.
+
       Raised from 0.205.4 to 0.211.5 on 13 September 2026, twenty releases, to be
       current before cutover. No security advisory affects 0.205.4. Two changes
       matter here: 0.207.0 warns in the console about configuration keys it does
@@ -167,7 +189,7 @@
       Nothing here is loaded by the website itself. Every page a visitor sees
       still loads no third-party resource at all.
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.211.5/dist/sveltia-cms.js"></script>
+    <script src="https://unpkg.com/@sveltia/cms@0.231.0/dist/sveltia-cms.js"></script>
     <script>
       /*
         The preview for special events: what the calendar will show for the

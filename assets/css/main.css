@@ -313,6 +313,13 @@ article img { max-height: 70vh; width: auto; }
                   border-color: color-mix(in srgb, var(--banner-important-bg) 32%, #fff); }
 .year { margin-top: var(--s6); }
 .year h3 { border-bottom: 3px solid var(--accent); display: inline-block; padding-bottom: var(--s1); }
+.year { display: none; scroll-margin-top: var(--s4); }
+.year--latest, .year:target { display: block; }
+.year:target ~ .year--latest { display: none; }
+.years__list { list-style: none; margin: 0 0 var(--s4); padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
+.years__link { display: inline-block; padding: var(--s2) var(--s3); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); text-decoration: none; font-variant-numeric: tabular-nums; }
+.years__link[aria-current] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.year__count { color: var(--muted); font-weight: 400; font-size: .9em; margin-left: var(--s2); }
 
 /* --- Officers ----------------------------------------------------------- */
 .officer { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s4); background: var(--surface); }

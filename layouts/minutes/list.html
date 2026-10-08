@@ -1,11 +1,14 @@
-{{ define "main" }}
-<h1>{{ .Title }}</h1>
-<p class="lede">Minutes of Association meetings. Each entry links directly to the document.</p>
-{{ range .Pages.GroupByDate "2006" }}
-<section class="year">
-  <h3>{{ .Key }}</h3>
+{{ define "partials/inline/minutes-year.html" }}
+<section class="year{{ if .latest }} year--latest{{ end }}" id="y{{ .g.Key }}" aria-labelledby="h{{ .g.Key }}">
+  <nav class="years" aria-label="Minutes by year">
+    <ul class="years__list">
+      {{ $here := .g.Key }}
+      {{ range .groups }}<li><a class="years__link"{{ if eq .Key $here }} aria-current="true"{{ end }} href="#y{{ .Key }}">{{ .Key }}</a></li>{{ end }}
+    </ul>
+  </nav>
+  <h3 id="h{{ .g.Key }}">{{ .g.Key }} <span class="year__count">{{ len .g.Pages }} {{ cond (eq (len .g.Pages) 1) "set" "sets" }}</span></h3>
   <ul class="rows">
-    {{ range .Pages.ByDate.Reverse }}
+    {{ range .g.Pages.ByDate.Reverse }}
     <li>
       <span class="rows__date">{{ .Date.Format "2 January" }}</span>
       <a href="{{ partial "asset.html" .Params.document }}" target="_blank" rel="noopener">Minutes of {{ .Date.Format "2 January 2006" }} (PDF){{ partial "newtab-note.html" . }}</a>
@@ -14,6 +17,20 @@
     {{ end }}
   </ul>
 </section>
+{{ end }}
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+<p class="lede">Minutes of Association meetings. Each entry links directly to the document.</p>
+{{/* A row of year links; the newest year shows unless the address names
+     another. Each year carries its own copy of the row with itself marked,
+     so the visible row is always right with no script and no :has(). The
+     newest year comes LAST in the markup so that `.year:target ~
+     .year--latest` can hide it when another year is chosen; only one year
+     shows at a time, so markup order is not visible order. */}}
+{{ $groups := .Pages.GroupByDate "2006" }}
+{{ with $groups }}
+{{ range $i, $g := . }}{{ if gt $i 0 }}{{ partial "inline/minutes-year.html" (dict "g" $g "groups" $groups "latest" false) }}{{ end }}{{ end }}
+{{ partial "inline/minutes-year.html" (dict "g" (index . 0) "groups" $groups "latest" true) }}
 {{ else }}
 <p class="empty">No minutes have been posted.</p>
 {{ end }}

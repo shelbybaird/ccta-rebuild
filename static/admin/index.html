@@ -128,6 +128,21 @@
       publication can never change this page on its own. Raising the version is
       a deliberate edit, made and tested here first.
 
+      Raised from 0.231.0 to 0.242.0 on 15 October 2026, fifteen releases,
+      before the demonstration at that evening's meeting (execution plan 8.6).
+      One security advisory affects 0.231.0, rated medium and fixed in 0.238.1.
+      It does not reach this site, which leaves the editor's preview
+      sanitizing on, as it is by default. Three changes matter here:
+
+        - 0.234.0 checks the configuration more strictly as the editor loads,
+          and stores a link to another entry, such as the alert banner's link
+          to an announcement, as that entry's stored value.
+        - 0.236.0 shows a message asking for a newer browser in place of the
+          sign-in page: Safari 18.4, Chrome and Edge 140, or Firefox 133.
+        - 0.238.0 lists entries as a table on a large screen, and gives each
+          item in a list, such as an announcement's files, buttons to move it
+          up or down.
+
       Raised from 0.211.5 to 0.231.0 on 7 October 2026, forty-seven releases.
       Six security advisories affect 0.211.5. Four reach this site, all rated
       low: fixed in 0.221.2 and 0.221.7, one of them a script carried inside an
@@ -189,7 +204,7 @@
       Nothing here is loaded by the website itself. Every page a visitor sees
       still loads no third-party resource at all.
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.231.0/dist/sveltia-cms.js"></script>
+    <script src="https://unpkg.com/@sveltia/cms@0.242.0/dist/sveltia-cms.js"></script>
     <script>
       /*
         The preview for special events: what the calendar will show for the

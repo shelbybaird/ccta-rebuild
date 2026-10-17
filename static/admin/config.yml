@@ -497,7 +497,7 @@ collections:
         type: date
         format: 'YYYY-MM-DD'
         required: true
-        hint: Places the entry under the right year and supplies its label.
+        hint: The date of the meeting these minutes record, as their heading gives it, not the meeting that approved them. Places the entry under the right year and supplies its label.
 
       - label: Document
         name: document

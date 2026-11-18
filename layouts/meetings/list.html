@@ -1,23 +1,34 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
-<p class="lede">Every meeting on the Association's schedule, with its venue and address. A cancelled meeting stays listed and marked.</p>
+<p class="lede">The meetings still to come on the Association's schedule, with each venue and address. A cancelled meeting stays listed and marked. A meeting that has taken place is recorded in the <a href="{{ (site.GetPage "/minutes").RelPermalink }}">minutes</a>.</p>
 {{/* This page is the schedule of meetings, with each venue's name and address.
      The address follows `showAddresses` in the calendar settings, as it does on
      the calendar. Special events are on the calendar, which is also the page
      that can be subscribed to. The address links to Apple Maps only, for now,
-     for the reasons in the private repository's known-issues list. */}}
+     for the reasons in the private repository's known-issues list.
+
+     It looks forward. A meeting is listed until it is over, by the rule the
+     home page uses: its start plus the calendar settings' default length, the
+     `until` of the occasions partial. So the home page's link to a meeting
+     under way still lands here. A meeting that has happened keeps its entry,
+     and stays on the calendar and in the feed; its record is the minutes. The
+     site rebuilds when a meeting begins and when it is over
+     (`tools/next-boundary.py`), so the list moves on by itself. */}}
 {{ $showAddr := ne (printf "%v" hugo.Data.calendar.showAddresses) "false" }}
+{{ $ahead := where (where (partial "occasions.html" .) "kind" "meeting") "until" "gt" now }}
 <p>The <a href="{{ (site.GetPage "/calendar").RelPermalink }}">calendar</a> carries every meeting and special event, and can be subscribed to.</p>
 <ul class="rows rows--meetings">
-  {{ range .Pages.ByDate }}
-  <li id="meeting-{{ .Date.Format "2006-01-02" }}">
-    <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Mon 2 Jan 2006" }}</time>
+  {{ range $ahead }}
+  <li id="{{ .anchor }}">
+    <time datetime="{{ .start.Format "2006-01-02T15:04:05Z07:00" }}">{{ .start.Format "Mon 2 Jan 2006" }}</time>
     <div class="rows__detail">
-      <span>{{ .Params.location }}{{ if ne .Params.status "scheduled" }} <span class="tag tag--{{ .Params.status }}">{{ .Params.status }}</span>{{ end }}</span>
-      {{ if and $showAddr .Params.address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ .Params.address | urlquery }}">{{ .Params.address }}</a>{{ end }}
-      {{ with .Params.note }}<span class="rows__note">{{ . }}</span>{{ end }}
+      <span>{{ .location }}{{ if ne .status "scheduled" }} <span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}</span>
+      {{ if and $showAddr .address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ .address | urlquery }}">{{ .address }}</a>{{ end }}
+      {{ with .note }}<span class="rows__note">{{ . }}</span>{{ end }}
     </div>
   </li>
+  {{ else }}
+  <li>No meeting is scheduled yet.</li>
   {{ end }}
 </ul>
 {{ end }}

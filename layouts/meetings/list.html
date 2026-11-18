@@ -4,8 +4,8 @@
 {{/* This page is the schedule of meetings, with each venue's name and address.
      The address follows `showAddresses` in the calendar settings, as it does on
      the calendar. Special events are on the calendar, which is also the page
-     that can be subscribed to. The address links to Apple Maps only, for now,
-     for the reasons in the private repository's known-issues list.
+     that can be subscribed to. Beneath the address, two buttons give
+     directions in Apple Maps or Google Maps (`partials/directions.html`).
 
      It looks forward. A meeting is listed until it is over, by the rule the
      home page uses: its start plus the calendar settings' default length, the
@@ -23,7 +23,7 @@
     <time datetime="{{ .start.Format "2006-01-02T15:04:05Z07:00" }}">{{ .start.Format "Mon 2 Jan 2006" }}</time>
     <div class="rows__detail">
       <span>{{ .location }}{{ if ne .status "scheduled" }} <span class="tag tag--{{ .status }}">{{ .status }}</span>{{ end }}</span>
-      {{ if and $showAddr .address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ .address | urlquery }}">{{ .address }}</a>{{ end }}
+      {{ if and $showAddr .address }}<span class="occasion__address">{{ .address }}</span>{{ partial "directions.html" .address }}{{ end }}
       {{ with .note }}<span class="rows__note">{{ . }}</span>{{ end }}
     </div>
   </li>

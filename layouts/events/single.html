@@ -5,7 +5,7 @@
 {{ with .Params.location }}
 <p class="occasion__where">
   <span class="occasion__venue">{{ . }}</span>
-  {{ with $.Params.address }}<span class="occasion__address">{{ . }}</span>{{ end }}
+  {{ with $.Params.address }}<span class="occasion__address">{{ . }}</span>{{ partial "directions.html" . }}{{ end }}
 </p>
 {{ end }}
 {{ with .Params.note }}<p class="occasion__note">{{ . }}</p>{{ end }}

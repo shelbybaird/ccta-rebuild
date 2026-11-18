@@ -399,6 +399,11 @@ article img { max-height: 70vh; width: auto; }
 /* The address is set quieter than the venue and never smaller than the body
    text it sits beside. It is the answer to "where is that", not a footnote. */
 .occasion__address { color: var(--muted); }
+/* Directions under an address: the two quiet buttons on a line of their own,
+   a little smaller than a page's own actions, and never under the size a
+   finger can press. */
+.directions { display: flex; flex-wrap: wrap; gap: var(--s2); flex-basis: 100%; margin: var(--s2) 0 0; }
+.directions .button { padding: .3rem .7rem; font-size: .9rem; line-height: 1.4; }
 .occasion__note { margin: var(--s2) 0 0; color: var(--muted); font-style: italic; white-space: pre-line; }
 
 /* A footnote marker. Raised and set small, and given a target big enough to

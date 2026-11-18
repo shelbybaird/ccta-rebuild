@@ -15,9 +15,8 @@
   Association meets somewhere different every month, so where is as much of the
   announcement as when. The home page and the meetings page print it too, and
   `showAddresses` in the calendar settings turns it off in all three places.
-  The address links to Apple Maps only, for now; the reasons, and the plan for
-  sending every device to its own map application at cutover, are in the
-  private repository's known-issues list.
+  Beneath the address, two buttons give directions in Apple Maps or Google
+  Maps (`partials/directions.html`).
 */}}
 {{ $o := .o }}
 {{/* The identity the month grid links to, built in `occasions.html`. Every day
@@ -36,7 +35,7 @@
   {{ with $o.location }}
   <p class="occasion__where">
     <span class="occasion__venue">{{ . }}</span>
-    {{ if and $.showAddr $o.address }}<a class="occasion__address" href="https://maps.apple.com/?q={{ $o.address | urlquery }}">{{ $o.address }}</a>{{ end }}
+    {{ if and $.showAddr $o.address }}<span class="occasion__address">{{ $o.address }}</span>{{ partial "directions.html" $o.address }}{{ end }}
   </p>
   {{ end }}
 

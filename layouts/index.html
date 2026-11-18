@@ -38,7 +38,7 @@
      The venue is named and its address printed beneath it, because not every
      reader goes on to the calendar and the Association meets somewhere
      different every month. `showAddresses` in the calendar settings turns the
-     address off here as it does on the calendar. The address links to Apple Maps only, for now; the reasons, and the plan for sending every device to its own map application at cutover, are in the private repository's known-issues list.
+     address off here as it does on the calendar. Beneath the address, two buttons give directions in Apple Maps or Google Maps (`partials/directions.html`).
 
      The card carries no note, so that it stays a few lines long. A meeting's
      card links to that meeting on the meetings page, which shows the note in
@@ -64,7 +64,7 @@
       {{/* An event is named and linked, because its name is what it is known by
            and its page carries the description. A meeting is not: it has no
            page of its own, and the label above has already said what it is. */}}
-      {{ $o := . }}{{ with .page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a> — {{ end }}{{ .location }}{{ if and $showAddr .address }}<br><a class="occasion__address" href="https://maps.apple.com/?q={{ .address | urlquery }}">{{ .address }}</a>{{ end }}{{ if eq .kind "meeting" }}<br><a href="{{ (site.GetPage "/meetings").RelPermalink }}#meeting-{{ .start.Format "2006-01-02" }}">Meeting details</a>{{ end }}</p>
+      {{ $o := . }}{{ with .page }}<a href="{{ .RelPermalink }}">{{ $o.title }}</a> — {{ end }}{{ .location }}{{ if and $showAddr .address }}<br><span class="occasion__address">{{ .address }}</span>{{ partial "directions.html" .address }}{{ end }}{{ if eq .kind "meeting" }}<br><a href="{{ (site.GetPage "/meetings").RelPermalink }}#meeting-{{ .start.Format "2006-01-02" }}">Meeting details</a>{{ end }}</p>
     </div>
     {{ end }}
   </div>

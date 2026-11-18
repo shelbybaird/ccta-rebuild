@@ -1,0 +1,23 @@
+{{/*
+  Directions to an address, in the reader's choice of map application. Takes the
+  address as a string.
+
+  Two buttons, Apple Maps and Google Maps, each by the link its maker documents
+  for directions from where the reader is: Apple's `daddr`, and Google's Maps
+  URL with `api=1` and `destination`. The site does not guess the device. A
+  `geo:` link, which would let a telephone choose for itself, is refused by
+  Safari on the iPhone in every form tried; sending each device somewhere by
+  its browser identity would need a redirect at Cloudflare and still guess
+  wrong for an iPad that reports itself as a Mac, or a Mac owner who uses
+  Google Maps. One tap to choose works on every device and needs nothing kept
+  up. Decided 18 November 2026 by Shelby Baird, in place of the Apple-only
+  link of 13 September.
+
+  Each button's accessible name says where it goes and to which address, and
+  begins with the words it shows, so a reader using voice control can say what
+  they see.
+*/}}
+<span class="directions">
+  <a class="button button--quiet" href="https://maps.apple.com/?daddr={{ . | urlquery }}" aria-label="Apple Maps directions to {{ . }}">Apple Maps</a>
+  <a class="button button--quiet" href="https://www.google.com/maps/dir/?api=1&amp;destination={{ . | urlquery }}" aria-label="Google Maps directions to {{ . }}">Google Maps</a>
+</span>

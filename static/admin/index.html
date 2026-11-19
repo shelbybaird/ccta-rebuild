@@ -128,6 +128,24 @@
       publication can never change this page on its own. Raising the version is
       a deliberate edit, made and tested here first.
 
+      Raised from 0.242.0 to 0.269.2 on 18 November 2026, forty-seven releases,
+      to bring the editor current (execution plan 8.6). Three security
+      advisories affect 0.242.0, fixed in 0.253.0 and 0.253.1. One, rated
+      medium, is in the review queue this site does not use. Two are rated low:
+      an entry search that crafted content could freeze, and integration keys
+      carried over through a mobile sign-in link. Four changes matter here:
+
+        - 0.253.0 caps a new entry's file name at 200 bytes, and dates the
+          `{{year}}`, `{{month}}` and `{{day}}` tags of a slug from the entry's
+          own date, in UTC. No slug in config.yml uses those tags; the
+          meetings and minutes read their date field through `date()`.
+        - 0.257.0 gives a link to another entry, such as the alert banner's
+          link to an announcement, an Edit button that opens that entry in a
+          dialog and saves both in one commit.
+        - 0.266.0: the Restore Draft dialog no longer hides the entry.
+        - 0.267.0: the asset screens can move a file between folders, and
+          update the entries that use it.
+
       Raised from 0.231.0 to 0.242.0 on 15 October 2026, fifteen releases,
       before the demonstration at that evening's meeting (execution plan 8.6).
       One security advisory affects 0.231.0, rated medium and fixed in 0.238.1.
@@ -204,7 +222,7 @@
       Nothing here is loaded by the website itself. Every page a visitor sees
       still loads no third-party resource at all.
     -->
-    <script src="https://unpkg.com/@sveltia/cms@0.242.0/dist/sveltia-cms.js"></script>
+    <script src="https://unpkg.com/@sveltia/cms@0.269.2/dist/sveltia-cms.js"></script>
     <script>
       /*
         The preview for special events: what the calendar will show for the
